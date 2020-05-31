@@ -2,7 +2,6 @@
 
 # CLASIFICACIÓN: OPTICAL RECOGNITION OF HANDWRITTEN DIGITS
 
-import csv
 import numpy as np
 
 from sklearn import preprocessing
@@ -10,30 +9,12 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import zero_one_loss
+from sklearn.metrics import zero_one_loss, confusion_matrix
 
 # Fijamos la semilla
 np.random.seed(1)
 
 # -------------------- FUNCIONES --------------------
-
-# Función para leer los datos
-def readData(file_x):
-	# Leemos los ficheros
-    with open(file_x) as file_x:
-        data = csv.reader(file_x,delimiter=',')
-        x = []
-        y = []
-        
-    	# Guardamos los datos y su etiqueta
-        for i in data:
-            x.append(i)
-        x = np.array(x)
-        
-        y = np.array(x[:,(x.shape[1]-1):x.shape[1]])
-        x = np.array(x[:,:-1], np.float64)
-    	
-        return x, y
 
 # Leer un fichero con todos los datos disponibles
 def readRawFile(file):
@@ -104,8 +85,8 @@ print("--------- CLASIFICACIÓN ---------")
 # Lectura de datos
 print("\nLeyendo datos...")
 
-x_train = readRawFile("datos/segmentation.test")
-x_test = readRawFile("datos/segmentation.data")
+x_train = readRawFile("datos/segmentation.tra")
+x_test = readRawFile("datos/segmentation.tes")
 
 x_train, y_train = extractLabels(x_train,0)
 x_test, y_test = extractLabels(x_test,0)
@@ -153,14 +134,16 @@ score_per_sq = cross_val_score(percep,x_train_sq,y_train,cv=5)
 print("Perceptron sq: ",1-score_per_sq.mean())
 
 # Entrenamiento
-print("\nModelo elegido: Regresión Logística con combinaciones cuadráticas")
+print("\nModelo elegido: Perceptrón con combinaciones cuadráticas")
 print("\nEntrenando el modelo...")
 
 percep.fit(x_train_sq,y_train)
 
 print("\nEin: ",zero_one_loss(y_train,percep.predict(x_train_sq)))
-print("Etest: ",zero_one_loss(y_test,percep.predict(x_test_sq)))
-print("Eout(según CV): ",1-score_per_sq.mean())
+print("\n",confusion_matrix(y_train,percep.predict(x_train_sq)))
+print("\nEtest: ",zero_one_loss(y_test,percep.predict(x_test_sq)))
+print("\n",confusion_matrix(y_test,percep.predict(x_test_sq)))
+print("\nEout(según CV): ",1-score_per_sq.mean())
 
 #----------------------------------------------------------
 #                 Modelo 1
