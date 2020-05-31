@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\title{AJUSTE DE PREDICTOR PARA IMAGE SEGMENTATION DATA SET}
+\author{Antonio José Blánquez Pérez, Diego Navarro Cabrera}
+\date{Proyecto final Aprendizaje Automático - Universidad de Granada}
+
+\begin{document}
+
+	\maketitle
+	
+	% La organización en secciones es solo pa organizarme, luego se puede reestructurar todo
+
+	\section{Definición del problema a resolver y enfoque elegido} % Blanquez
+	%
+	% Repasar traducciones de las clases, no estoy seguro de losa(brickface) ni de camino(path), que entiendo que es un camino de tierra.
+	%
+	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son losa, cielo, follaje, cemento, ventana, camino y césped. Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante.\\\\
+	Con esta información se pretende generar un modelo mediante técnicas de aprendizaje supervisado que prediga correctamente, dada una sección de 3x3 píxeles de una imagen, a que clase de las 7 antes mencionadas pertenece.
+	%
+	% Se puede completar con algo más	
+	
+	\section{Argumentos a favor de la elección de los modelos} % Blanquez
+	
+	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo esta última técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además, ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables.
+	
+	% Se puede completar más el lineal cuando confirmemos su uso
+	
+	% Faltan los modelos no lineales, aún no elegidos
+	
+	\section{Codificación de los datos de entrada para hacerlos útiles a los algoritmos} % Blanquez
+	
+	% Controlamos las primeras líneas de los archivos que no son datos?
+	
+	En principio los datos no necesitan ningún tipo de codificación para ser útiles en proceso de aprendizaje, no obstante se han convertido los datos a combinaciones cuadráticas de estos. Así damos potencia al ajuste ya que, aunque estén ajustados por un modelo lineal, los datos podrán estar clasificados como funciones cuadráticas. Para ello se ha hecho uso de la función $Polynomial\_Features$ del módulo $Preprocessing$ de Scikit-Learn, pasándole como parámetro el exponente 2 para obtener la susodicha combinación.
+	
+	%	Se ha hecho el siguiente cambio en los archivos originales
+	%	.data -$>$ .tes
+	%	.test -$>$ .tra
+	%	ya que antes había 210 en tra y 2100 en test
+	%
+	%	En segmentation.names especifica que la distribución anterior es correcta, por qué?
+	
+	\section{Valoración del interés de la variables para el problema y selección de un subconjunto (en su caso)} % Diego
+	
+	%	Los atributos 1 y 2 son la localización del píxel central(columna,fila), valorar su necesidad
+	%	El atributo 3 es igual en todas las instancias: 9, el número de píxeles de la región, no debería influir en el aprendizaje
+	
+	%	El resto parecen ser medidas medidas sobre la geometría y el color de la imagen, y por lo tanto necesarias
+	
+	\section{Normalización de las variables(en su caso)} % Diego
+	
+	
+	
+	\section{Justificación de la función de pérdida usada} % Blanquez
+	
+	
+	
+	\section{Selección de las técnica (paramétrica) y valoración de la idoneidad de la misma frente a otras alternativas} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
+	
+	
+	
+	\section{Aplicación de la técnica especificando claramente que algoritmos se usan en la estimación de los parámetros, los hiperparámetros y el error de generalización.} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
+	
+	
+	
+	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)} % No me acuerdo porque estaba resaca xd
+	
+	
+	
+	\section{Valoración de los resultados ( gráficas, métricas de error, análisis de residuos, etc )} % Hacer juntos al final
+	
+	
+	
+	\section{Justificar que se ha obtenido la mejor de las posibles soluciones con la técnica elegida y la muestra dada. Argumentar en términos de los errores de ajuste y generalización} % Hacer juntos al final
+	
+	
+	
+\end{document}
