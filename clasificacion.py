@@ -44,6 +44,10 @@ def dataToFloat(data):
 
     return np.array(data)
 
+def removeAtribute(data, index):
+    for i in range(len(data)):
+        del data[i][index]
+
 def encodeLabels(labels, categories = []):
     # Buscamos todos los tipos de categorias que hay
     for i in range(len(labels)):
@@ -58,6 +62,7 @@ def normalizar(data_tra, data_tes):
     scaler = preprocessing.MinMaxScaler()
     normalized_tra = scaler.fit_transform(data_tra)
     normalized_tes = scaler.transform(data_tes)
+    
     return normalized_tra, normalized_tes
 
 # Función para reducir dimensionalidad
@@ -93,6 +98,9 @@ x_test, y_test = extractLabels(x_test,0)
 
 dataToFloat(x_train)
 dataToFloat(x_test)
+
+removeAtribute(x_train, 2)
+removeAtribute(x_test, 2)
 
 y_train, cat = encodeLabels(y_train)
 y_test, cat = encodeLabels(y_test, categories = cat)
@@ -143,7 +151,9 @@ print("\nEin: ",zero_one_loss(y_train,percep.predict(x_train_sq)))
 print("\n",confusion_matrix(y_train,percep.predict(x_train_sq)))
 print("\nEtest: ",zero_one_loss(y_test,percep.predict(x_test_sq)))
 print("\n",confusion_matrix(y_test,percep.predict(x_test_sq)))
-print("\nEout(según CV): ",1-score_per_sq.mean())
+print("\nEval(según CV): ",1-score_per_sq.mean())
+
+input("\nPulse una tecla para continuar\n")
 
 #----------------------------------------------------------
 #                 Modelo 1

@@ -1,10 +1,12 @@
 \documentclass{article}
+\usepackage{indentfirst}
 
 \title{AJUSTE DE PREDICTOR PARA IMAGE SEGMENTATION DATA SET}
 \author{Antonio José Blánquez Pérez, Diego Navarro Cabrera}
 \date{Proyecto final Aprendizaje Automático - Universidad de Granada}
 
 \begin{document}
+ \setlength{\parskip}{1em} 
 
 	\maketitle
 	
@@ -14,7 +16,8 @@
 	%
 	% Repasar traducciones de las clases, no estoy seguro de losa(brickface) ni de camino(path), que entiendo que es un camino de tierra.
 	%
-	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son losa, cielo, follaje, cemento, ventana, camino y césped. Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante.\\\\
+	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son losa, cielo, follaje, cemento, ventana, camino y césped. Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante. 
+	\par
 	Con esta información se pretende generar un modelo mediante técnicas de aprendizaje supervisado que prediga correctamente, dada una sección de 3x3 píxeles de una imagen, a que clase de las 7 antes mencionadas pertenece.
 	%
 	% Se puede completar con algo más	
@@ -42,13 +45,22 @@
 	
 	\section{Valoración del interés de la variables para el problema y selección de un subconjunto (en su caso)} % Diego
 	
-	%	Los atributos 1 y 2 son la localización del píxel central(columna,fila), valorar su necesidad
-	%	El atributo 3 es igual en todas las instancias: 9, el número de píxeles de la región, no debería influir en el aprendizaje
+En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema deshechando algunas de ellas o usando una técnica de reducción como PCA.
+\par 
+Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
 	
-	%	El resto parecen ser medidas medidas sobre la geometría y el color de la imagen, y por lo tanto necesarias
+	%	El resto parecen ser medidas sobre la geometría y el color de la imagen, y por lo tanto necesarias
 	
 	\section{Normalización de las variables(en su caso)} % Diego
-	
+	Puesto que el rango de los atributos varia de unos a otros es importante reescalar cada uno de forma independiente para poder compararlos mejor y no darle más o menos peso a cada atributo en función de su tamaño. Para esto usaremos una escala min-max que para cada atributo $x_i$ perteneciente a la muestra i calcula:
+\begin{equation}
+x_i' = \frac{x_i-min}{max-min}
+\end{equation}
+\indent Donde min y max son los valores mínimo y máximo del atributo en toda la muestra.
+\par 
+Este tipo de escala mantiene la distribución de los valores, pero los ajusta a un rango entre 0 y 1.  Si supiéramos que los datos se siguen un tipo de distribución como la distribución normal podríamos usar otras formas de normalización, pero este no parece ser el caso, por lo que usar estas otras técnicas modificaría la distribución de la muestra y provocaría un peor ajuste.
+\par 
+Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
 	
 	\section{Justificación de la función de pérdida usada} % Blanquez
