@@ -10,7 +10,8 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import zero_one_loss, confusion_matrix
-from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -68,7 +69,7 @@ def normalizar(data_tra, data_tes):
 
 # Función para reducir dimensionalidad
 def reducir(data_tra,data_tes):
-    reduc = PCA(0.99)
+    reduc = PCA(0.95)
     reduced_tra = reduc.fit_transform(data_tra)
     reduced_tes = reduc.transform(data_tes)
     return reduced_tra, reduced_tes
@@ -179,16 +180,69 @@ print("\nEval(según CV): ",Emin)
 input("\nPulse una tecla para continuar\n")
 
 #----------------------------------------------------------
-#                 Boosting
+#           Perceptron Multicapa
+#----------------------------------------------------------
+print("\n Perceptron Multicapa: ")
+
+m_it = 1000
+a = 0.01
+
+Emin = 1
+
+for nd in range(50,101,10):
+    for lr in range(1,10,1):
+        print("ND: ",nd," LR: ",lr/100)
+        boost = MLPClassifier(hidden_layer_sizes=(nd, ), max_iter = m_it, learning_rate_init = lr/100, alpha = a )
+
+        score = cross_val_score(boost, x_train, y_train, cv=5)
+        print("MLP: ",1-score.mean())
+
+        if 1-score.mean() < Emin:
+            Emin = 1-score.mean()
+            best_nd = nd
+            best_lr = lr/100
+
+model = MLPClassifier(hidden_layer_sizes=(nd, ), max_iter = m_it, learning_rate_init = best_lr, alpha = a)
+model.fit(x_train,y_train)
+
+print("\nND Final: ",best_nd," LR Final: ",best_lr)
+print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+print("\n",confusion_matrix(y_train,model.predict(x_train)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+print("\n",confusion_matrix(y_test,model.predict(x_test)))
+print("\nEval(según CV): ",Emin)
+
+#----------------------------------------------------------
+#                   Boosting
 #----------------------------------------------------------
 
-boost = SVC(kernel = 'rbf')
+print("\n Boosting: ")
+
+boost = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=50, max_features = 'auto')
 
 score = cross_val_score(boost, x_train, y_train, cv=5)
-print(": ",1-score.mean())
-score_sq = cross_val_score(boost, x_train_sq, y_train, cv=5)
-print(": ",1-score_sq.mean())
+Emin = 1-score.mean()
+ne = 50
+print("Nº Estimators = ",ne)
+print("Boosting: ",Emin)
 
-#----------------------------------------------------------
-#                 Modelo 2
-#----------------------------------------------------------
+for i in range(60,101,10):
+    print("\nNº Estimators = ",i)
+    boost = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=i)
+
+    score = cross_val_score(boost, x_train, y_train, cv=5)
+    print("Boosting: ",1-score.mean())
+
+    if 1-score.mean() < Emin:
+        Emin = 1-score.mean()
+        ne = i
+
+model = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=ne, max_features = 'auto')
+model.fit(x_train,y_train)
+
+print("\n Nº Estimadores Finales = ",ne)
+print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+print("\n",confusion_matrix(y_train,model.predict(x_train)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+print("\n",confusion_matrix(y_test,model.predict(x_test)))
+print("\nEval(según CV): ",Emin)
