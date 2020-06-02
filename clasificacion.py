@@ -10,6 +10,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import zero_one_loss, confusion_matrix
+from sklearn.svm import SVC
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -90,8 +91,8 @@ print("--------- CLASIFICACIÓN ---------")
 # Lectura de datos
 print("\nLeyendo datos...")
 
-x_train = readRawFile("datos/segmentation.tra")
-x_test = readRawFile("datos/segmentation.tes")
+x_train = readRawFile("datos/segmentation.tes")
+x_test = readRawFile("datos/segmentation.tra")
 
 x_train, y_train = extractLabels(x_train,0)
 x_test, y_test = extractLabels(x_test,0)
@@ -133,31 +134,60 @@ log_reg = SGDClassifier(loss="log", penalty = 'l1')
 percep = SGDClassifier(loss="perceptron", penalty = 'l1')
 
 score_log = cross_val_score(log_reg, x_train, y_train, cv=5)
+Emin = 1-score_log.mean()
+model = log_reg
+training = x_train
+test = x_test
 print("R. Logaritmica: ",1-score_log.mean())
+
 score_log_sq = cross_val_score(log_reg,x_train_sq,y_train,cv=5)
+if 1-score_log_sq.mean() < Emin:
+    Emin = 1-score_log_sq.mean()
+    training = x_train_sq
+    test = x_test_sq
 print("R. Logaritmica sq:",1-score_log_sq.mean())
+
 score_per = cross_val_score(percep,x_train,y_train,cv=5)
+if 1-score_per.mean() < Emin:
+    Emin = 1-score_per.mean()
+    model = percep
+    training = x_train
+    test = x_test
 print("Perceptron: ",1-score_per.mean())
+
 score_per_sq = cross_val_score(percep,x_train_sq,y_train,cv=5)
+if 1-score_per_sq.mean() < Emin:
+    Emin = 1-score_per_sq.mean()
+    model = percep
+    training = x_train_sq
+    test = x_test_sq
 print("Perceptron sq: ",1-score_per_sq.mean())
 
 # Entrenamiento
-print("\nModelo elegido: Perceptrón con combinaciones cuadráticas")
+#print("\nModelo elegido: Perceptrón con combinaciones cuadráticas")
 print("\nEntrenando el modelo...")
 
-percep.fit(x_train_sq,y_train)
 
-print("\nEin: ",zero_one_loss(y_train,percep.predict(x_train_sq)))
-print("\n",confusion_matrix(y_train,percep.predict(x_train_sq)))
-print("\nEtest: ",zero_one_loss(y_test,percep.predict(x_test_sq)))
-print("\n",confusion_matrix(y_test,percep.predict(x_test_sq)))
-print("\nEval(según CV): ",1-score_per_sq.mean())
+model.fit(training,y_train)
+
+print("\nEin: ",zero_one_loss(y_train,model.predict(training)))
+print("\n",confusion_matrix(y_train,model.predict(training)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(test)))
+print("\n",confusion_matrix(y_test,model.predict(test)))
+print("\nEval(según CV): ",Emin)
 
 input("\nPulse una tecla para continuar\n")
 
 #----------------------------------------------------------
-#                 Modelo 1
+#                 Boosting
 #----------------------------------------------------------
+
+boost = SVC(kernel = 'rbf')
+
+score = cross_val_score(boost, x_train, y_train, cv=5)
+print(": ",1-score.mean())
+score_sq = cross_val_score(boost, x_train_sq, y_train, cv=5)
+print(": ",1-score_sq.mean())
 
 #----------------------------------------------------------
 #                 Modelo 2
