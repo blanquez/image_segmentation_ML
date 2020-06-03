@@ -196,6 +196,8 @@ for nd in range(50,101,10):
 
         score = cross_val_score(boost, x_train, y_train, cv=5)
         print("MLP: ",1-score.mean())
+        #score_sq = cross_val_score(boost, x_train_sq, y_train, cv=5)
+        #print("MLP: ",1-score_sq.mean())
 
         if 1-score.mean() < Emin:
             Emin = 1-score.mean()
@@ -211,6 +213,8 @@ print("\n",confusion_matrix(y_train,model.predict(x_train)))
 print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
 print("\nEval(según CV): ",Emin)
+
+input("\nPulse una tecla para continuar\n")
 
 #----------------------------------------------------------
 #                   Boosting
@@ -246,3 +250,5 @@ print("\n",confusion_matrix(y_train,model.predict(x_train)))
 print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
 print("\nEval(según CV): ",Emin)
+
+input("\nPulse una tecla para continuar\n")
