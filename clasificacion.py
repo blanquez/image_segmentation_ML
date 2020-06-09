@@ -136,14 +136,14 @@ a = [0.0001+0.001*i for i in range(0,10)]
 
 parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
-linear_model = SGDClassifier(penalty = 'l1')
+linear_model = SGDClassifier()
 
-sg = GridSearchCV(linear_model, parameters, n_jobs = 2)
+sg = GridSearchCV(linear_model, parameters, n_jobs = 2, scoring = 'accuracy')
 
 print("\nEntrenando el modelo...")
 
 model = sg.fit(x_train,y_train)
-Eval = model.best_score_.mean()
+Eval = 1-model.best_score_.mean()
 
 print("\n Mejores parametros: ",model.best_params_.items())
 print("\nEval (según CV): ",Eval)
@@ -160,7 +160,7 @@ input("\nPulse una tecla para continuar\n")
 #----------------------------------------------------------
 print("\n Perceptron Multicapa: ")
 
-nd = [(i, ) for i in range(50,101,10)]
+nd = [(i,) for i in range(50,101,10)]
 a = (0.001, 0.01, 0.1)
 s = ('lbfgs', 'adam')
 
@@ -168,12 +168,12 @@ parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
 
 mlp = MLPClassifier(max_iter = 500, activation = 'identity')
 
-sg = GridSearchCV(mlp, parameters, n_jobs = 4)
+sg = GridSearchCV(mlp, parameters, n_jobs = 4, scoring = 'accuracy')
 
 print("\nEntrenando el modelo...")
 
 model = sg.fit(x_train,y_train)
-Eval = model.best_score_.mean()
+Eval = 1-model.best_score_.mean()
 
 print("\n Mejores parametros: ",model.best_params_.items())
 print("\nEval(según CV): ",Eval)
@@ -189,19 +189,18 @@ input("\nPulse una tecla para continuar\n")
 # #----------------------------------------------------------
 print("\n Boosting: ")
 
-ne = [75+25*i for i in range(1,3)]
-lr = (0.01, 0.1, 1.0)
+ne = [150]
 
-parameters = {'n_estimators' : ne, 'learning_rate' : lr}
+parameters = {'n_estimators' : ne}
 
 gbc = GradientBoostingClassifier()
 
-sg = GridSearchCV(gbc, parameters, n_jobs = 4)
+sg = GridSearchCV(gbc, parameters, n_jobs = 4, scoring = 'accuracy')
 
 print("\nEntrenando el modelo...")
 
 model = sg.fit(x_train,y_train)
-Eval = model.best_score_.mean()
+Eval = 1-model.best_score_.mean()
 
 print("\n Mejores parametros: ",model.best_params_.items())
 print("\nEval(según CV): ",Eval)
