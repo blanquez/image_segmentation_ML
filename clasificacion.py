@@ -8,6 +8,7 @@ from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import zero_one_loss, confusion_matrix
 from sklearn.neural_network import MLPClassifier
@@ -129,53 +130,28 @@ x_test_sq = transformar_polinomial(x_test,2)
 
 # Validación cruzada
 print("\nModelos lineales: ")
-print("Ejecutando validación cruzada...\n")
+#print("Ejecutando validación cruzada...\n")
 
-log_reg = SGDClassifier(loss="log", penalty = 'l1')
-percep = SGDClassifier(loss="perceptron", penalty = 'l1')
+a = [0.0001+0.001*i for i in range(0,10)]
 
-score_log = cross_val_score(log_reg, x_train, y_train, cv=5)
-Emin = 1-score_log.mean()
-model = log_reg
-training = x_train
-test = x_test
-print("R. Logaritmica: ",1-score_log.mean())
+parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
-score_log_sq = cross_val_score(log_reg,x_train_sq,y_train,cv=5)
-if 1-score_log_sq.mean() < Emin:
-    Emin = 1-score_log_sq.mean()
-    training = x_train_sq
-    test = x_test_sq
-print("R. Logaritmica sq:",1-score_log_sq.mean())
+linear_model = SGDClassifier(penalty = 'l1')
 
-score_per = cross_val_score(percep,x_train,y_train,cv=5)
-if 1-score_per.mean() < Emin:
-    Emin = 1-score_per.mean()
-    model = percep
-    training = x_train
-    test = x_test
-print("Perceptron: ",1-score_per.mean())
+sg = GridSearchCV(linear_model, parameters, n_jobs = 2)
 
-score_per_sq = cross_val_score(percep,x_train_sq,y_train,cv=5)
-if 1-score_per_sq.mean() < Emin:
-    Emin = 1-score_per_sq.mean()
-    model = percep
-    training = x_train_sq
-    test = x_test_sq
-print("Perceptron sq: ",1-score_per_sq.mean())
-
-# Entrenamiento
-#print("\nModelo elegido: Perceptrón con combinaciones cuadráticas")
 print("\nEntrenando el modelo...")
 
+model = sg.fit(x_train,y_train)
+Eval = model.best_score_.mean()
 
-model.fit(training,y_train)
+print("\n Mejores parametros: ",model.best_params_.items())
+print("\nEval (según CV): ",Eval)
 
-print("\nEin: ",zero_one_loss(y_train,model.predict(training)))
-print("\n",confusion_matrix(y_train,model.predict(training)))
-print("\nEtest: ",zero_one_loss(y_test,model.predict(test)))
-print("\n",confusion_matrix(y_test,model.predict(test)))
-print("\nEval(según CV): ",Emin)
+print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+print("\n",confusion_matrix(y_train,model.predict(x_train)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+print("\n",confusion_matrix(y_test,model.predict(x_test)))
 
 input("\nPulse una tecla para continuar\n")
 
@@ -184,71 +160,54 @@ input("\nPulse una tecla para continuar\n")
 #----------------------------------------------------------
 print("\n Perceptron Multicapa: ")
 
-m_it = 1000
-a = 0.01
+nd = [(i, ) for i in range(50,101,10)]
+a = (0.001, 0.01, 0.1)
+s = ('lbfgs', 'adam')
 
-Emin = 1
+parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
 
-for nd in range(50,101,10):
-    for lr in range(1,10,1):
-        print("ND: ",nd," LR: ",lr/100)
-        boost = MLPClassifier(hidden_layer_sizes=(nd, ), max_iter = m_it, learning_rate_init = lr/100, alpha = a )
+mlp = MLPClassifier(max_iter = 500, activation = 'identity')
 
-        score = cross_val_score(boost, x_train, y_train, cv=5)
-        print("MLP: ",1-score.mean())
-        #score_sq = cross_val_score(boost, x_train_sq, y_train, cv=5)
-        #print("MLP: ",1-score_sq.mean())
+sg = GridSearchCV(mlp, parameters, n_jobs = 4)
 
-        if 1-score.mean() < Emin:
-            Emin = 1-score.mean()
-            best_nd = nd
-            best_lr = lr/100
+print("\nEntrenando el modelo...")
 
-model = MLPClassifier(hidden_layer_sizes=(nd, ), max_iter = m_it, learning_rate_init = best_lr, alpha = a)
-model.fit(x_train,y_train)
+model = sg.fit(x_train,y_train)
+Eval = model.best_score_.mean()
 
-print("\nND Final: ",best_nd," LR Final: ",best_lr)
+print("\n Mejores parametros: ",model.best_params_.items())
+print("\nEval(según CV): ",Eval)
 print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
 print("\n",confusion_matrix(y_train,model.predict(x_train)))
 print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
-print("\nEval(según CV): ",Emin)
 
 input("\nPulse una tecla para continuar\n")
 
-#----------------------------------------------------------
-#                   Boosting
-#----------------------------------------------------------
-
+# #----------------------------------------------------------
+# #                   Boosting
+# #----------------------------------------------------------
 print("\n Boosting: ")
 
-boost = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=50, max_features = 'auto')
+ne = [75+25*i for i in range(1,3)]
+lr = (0.01, 0.1, 1.0)
 
-score = cross_val_score(boost, x_train, y_train, cv=5)
-Emin = 1-score.mean()
-ne = 50
-print("Nº Estimators = ",ne)
-print("Boosting: ",Emin)
+parameters = {'n_estimators' : ne, 'learning_rate' : lr}
 
-for i in range(60,101,10):
-    print("\nNº Estimators = ",i)
-    boost = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=i)
+gbc = GradientBoostingClassifier()
 
-    score = cross_val_score(boost, x_train, y_train, cv=5)
-    print("Boosting: ",1-score.mean())
+sg = GridSearchCV(gbc, parameters, n_jobs = 4)
 
-    if 1-score.mean() < Emin:
-        Emin = 1-score.mean()
-        ne = i
+print("\nEntrenando el modelo...")
 
-model = GradientBoostingClassifier(learning_rate = 0.1, n_estimators=ne, max_features = 'auto')
-model.fit(x_train,y_train)
+model = sg.fit(x_train,y_train)
+Eval = model.best_score_.mean()
 
-print("\n Nº Estimadores Finales = ",ne)
+print("\n Mejores parametros: ",model.best_params_.items())
+print("\nEval(según CV): ",Eval)
 print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
 print("\n",confusion_matrix(y_train,model.predict(x_train)))
 print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
-print("\nEval(según CV): ",Emin)
 
 input("\nPulse una tecla para continuar\n")
