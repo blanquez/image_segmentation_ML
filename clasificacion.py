@@ -7,12 +7,11 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.neighbors import LocalOutlierFactor
-from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import zero_one_loss, confusion_matrix
 from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -138,7 +137,7 @@ parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
 linear_model = SGDClassifier()
 
-sg = GridSearchCV(linear_model, parameters, n_jobs = 2, scoring = 'accuracy')
+sg = GridSearchCV(linear_model, parameters, n_jobs = 2, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
@@ -168,7 +167,7 @@ parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
 
 mlp = MLPClassifier(max_iter = 500, activation = 'identity')
 
-sg = GridSearchCV(mlp, parameters, n_jobs = 4, scoring = 'accuracy')
+sg = GridSearchCV(mlp, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
@@ -195,7 +194,7 @@ parameters = {'n_estimators' : ne}
 
 gbc = GradientBoostingClassifier()
 
-sg = GridSearchCV(gbc, parameters, n_jobs = 4, scoring = 'accuracy')
+sg = GridSearchCV(gbc, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
@@ -210,3 +209,31 @@ print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
 
 input("\nPulse una tecla para continuar\n")
+
+# #----------------------------------------------------------
+# #                 Random Forest
+# #----------------------------------------------------------
+print("\n Random Forest: ")
+
+ne = [100]
+
+parameters = {'n_estimators' : ne}
+
+rforest = RandomForestClassifier()
+
+sg = GridSearchCV(rforest, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
+
+print("\nEntrenando el modelo...")
+
+model = sg.fit(x_train,y_train)
+Eval = 1-model.best_score_.mean()
+
+print("\n Mejores parametros: ",model.best_params_.items())
+print("\nEval(según CV): ",Eval)
+print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+print("\n",confusion_matrix(y_train,model.predict(x_train)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+print("\n",confusion_matrix(y_test,model.predict(x_test)))
+
+input("\nPulse una tecla para terminar\n")
+
