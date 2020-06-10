@@ -132,7 +132,7 @@ x_test_sq = transformar_polinomial(x_test,2)
 print("\nModelos lineales: ")
 #print("Ejecutando validación cruzada...\n")
 
-a = [0.0001+0.001*i for i in range(0,10)]
+a = (0.0001, 0.001, 0.01, 0.1)
 
 parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
