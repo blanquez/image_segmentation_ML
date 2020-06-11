@@ -131,13 +131,13 @@ x_test_sq = transformar_polinomial(x_test,2)
 print("\n Modelos lineales: ")
 #print("Ejecutando validación cruzada...\n")
 
-a = (0.0001, 0.001, 0.01, 0.1)
+a = (0.0001,1.0)#, 0.001, 0.01, 0.1)
 
 parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
 linear_model = SGDClassifier()
 
-sg = GridSearchCV(linear_model, parameters, n_jobs = 2, scoring = 'accuracy', cv = 5, iid = False)
+sg = GridSearchCV(linear_model, parameters,  scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
@@ -157,44 +157,46 @@ input("\nPulse una tecla para continuar\n")
 #----------------------------------------------------------
 #           Perceptron Multicapa
 #----------------------------------------------------------
-print("\n Perceptron Multicapa: ")
+# print("\n Perceptron Multicapa: ")
 
-nd = [(i,) for i in range(50,101,10)]
-a = (0.001, 0.01, 0.1)
-s = ('lbfgs', 'adam')
+# nd = [(i,) for i in range(50,101,10)]
+# a = (0.001, 0.01, 0.1)
+# s = ('lbfgs', 'adam')
 
-parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
+# parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
 
-mlp = MLPClassifier(max_iter = 500, activation = 'identity')
+# mlp = MLPClassifier(max_iter = 500, activation = 'identity')
 
-sg = GridSearchCV(mlp, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
+# sg = GridSearchCV(mlp, parameters,  scoring = 'accuracy', cv = 5, iid = False)
 
-print("\nEntrenando el modelo...")
+# print("\nEntrenando el modelo...")
 
-model = sg.fit(x_train,y_train)
-Eval = 1-model.best_score_.mean()
+# model = sg.fit(x_train,y_train)
+# Eval = 1-model.best_score_.mean()
 
-print("\n Mejores parametros: ",model.best_params_.items())
-print("\nEval(según CV): ",Eval)
-print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
-print("\n",confusion_matrix(y_train,model.predict(x_train)))
-print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
-print("\n",confusion_matrix(y_test,model.predict(x_test)))
+# print("\n Mejores parametros: ",model.best_params_.items())
+# print("\nEval(según CV): ",Eval)
+# print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+# print("\n",confusion_matrix(y_train,model.predict(x_train)))
+# print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+# print("\n",confusion_matrix(y_test,model.predict(x_test)))
 
-input("\nPulse una tecla para continuar\n")
+# input("\nPulse una tecla para continuar\n")
 
 # #----------------------------------------------------------
 # #                   Boosting
 # #----------------------------------------------------------
 print("\n Boosting: ")
 
-ne = [150]
+sub = (0.9, 0.99)
+max_f = (2,3,4)
+lr = (0.1,0.01)
 
-parameters = {'n_estimators' : ne}
+parameters = {'subsample' : sub, 'max_features' : max_f, 'learning_rate' : lr}
 
-gbc = GradientBoostingClassifier()
+gbc = GradientBoostingClassifier(n_estimators = 150)
 
-sg = GridSearchCV(gbc, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
+sg = GridSearchCV(gbc, parameters, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
@@ -224,7 +226,7 @@ parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf, 'bootst
 
 rforest = RandomForestClassifier()
 
-sg = GridSearchCV(rforest, parameters, n_jobs = 4, scoring = 'accuracy', cv = 5, iid = False)
+sg = GridSearchCV(rforest, parameters, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
 
