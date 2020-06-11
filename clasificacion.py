@@ -128,7 +128,7 @@ x_test_sq = transformar_polinomial(x_test,2)
 #----------------------------------------------------------
 
 # Validación cruzada
-print("\nModelos lineales: ")
+print("\n Modelos lineales: ")
 #print("Ejecutando validación cruzada...\n")
 
 a = (0.0001, 0.001, 0.01, 0.1)
@@ -216,8 +216,11 @@ input("\nPulse una tecla para continuar\n")
 print("\n Random Forest: ")
 
 ne = [100]
+c = ['gini', 'entropy']
+mf = ['auto', 'log2', 0.6, 0.7, 0.8, 0.9]
+b = [True, False]
 
-parameters = {'n_estimators' : ne}
+parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf, 'bootstrap' : b}
 
 rforest = RandomForestClassifier()
 

@@ -11,6 +11,20 @@
 	\maketitle
 	
 	% La organización en secciones es solo pa organizarme, luego se puede reestructurar todo
+	
+	% A TENER EN CUENTA
+	
+	% ¿en qué momento regularizamos?
+	% Lo suyo seria hablar de Regularizacion en general en su apartado, si solo tiene sentido 
+	%		en modelo lineal deberiamos quitar el apartado
+	% Cuidado con 'es suficiente con' o 'pensamos que está bien' dejar los parámetros por
+	%		defecto, especifica claramente que hay que especificar el uso de los parámetros
+	% 		y no vale el argumento de 'están por defecto' (es Nicolas), yo los he nombrado todos
+	% 		más o menos y explicado porque se dejan por defecto o se elige algún valor o decir
+	%		que no queda claro y se somete a validación cruzada
+	% MLP no esta en la memoria y dice el commiy que si no? O se ha jodido algo?
+	% El punto 6 entiendo que se refiere al uso de zero_one_loss y matrices de confusion no?
+	%		Lo hago otro dia cuando lo tenga claro
 
 	\section{Definición del problema a resolver y enfoque elegido} % Blanquez
 	%
@@ -69,15 +83,18 @@ Para evitar mezclar la información del conjunto de entrenamiento con la del de 
 	
 	\section{Selección de las técnica (paramétrica) y valoración de la idoneidad de la misma frente a otras alternativas} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
 	\subsection{Modelo Lineal}
-	Para ajustar el modelo lineal vamos a usar la función de la biblioteca sklearn del gradiente descendente estocástico SGDClassifier. Vamos a comparar entre 2 modelos diferentes, y decidiremos cual es mejor en tiempo de ejecución. Los modelos que vamos a comparar son regresión logística y la implementación que usa la biblioteca del Perceptrón.
+	Para ajustar el modelo lineal vamos a usar la función de la biblioteca sklearn del gradiente descendente estocástico $SGDClassifier$. Vamos a comparar entre 2 modelos diferentes, y decidiremos cual es mejor en tiempo de ejecución. Los modelos que vamos a comparar son regresión logística y la implementación que usa la biblioteca del Perceptrón.
 	\par 
 	Usamos SGD como técnica	de ajuste porque es un algoritmo de optimización ámpliamente usado para ajustar todo tipo de modelos, y su implementación en scikit-learn nos facilitará su uso y el ajuste de todos sus posibles parámetros. 
 	\subsection{Boosting}
 	Como técnica de boosting vamos a usar gradient boosting, que aunque no use funciones stamp como se recomienda en el guión, funciona mucho mejor que AdaBoost u otras funciones que si las usen. Esto se debe a que puesto que nuestro conjunto de datos de entrenamiento es muy pequeño y simple, estimadores muy débiles no son lo suficientemente buenos como para contribuir de forma tan significativa como en casos más complejos, y sobre todo, un conjunto de entrenamiento pequeño requiere de un tiempo de aprendizaje mucho menor y por lo tanto es viable usar métodos más exigentes como gradient boosting, que requiere de significativamente más tiempo que AdaBoost para el ajuste. 
+	\subsection{Random Forest}
+	En el caso de Random Forest vamos a usar la versión estándar de scikit-learn para clasificación: $RandomForestClassifier$, del módulo $ensemble$. Se plantean otras alternativas nombradas como árboles extremadamente aleatorizados, sin embargo en este caso no nos interesan ya que este conjunto de datos es lo suficientemente simple como para poder generar un número de árboles que nos garantice una buena varianza en un tiempo razonable. Es por esto por lo que no nos interesa una técnica que fuerza más la aleatoriedad en pos de generar varianza a costa de sesgo.
+	
 	\section{Aplicación de la técnica especificando claramente que algoritmos se usan en la estimación de los parámetros, los hiperparámetros y el error de generalización.} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
-	Para ajustar los hiperparámetros de todos los modelos usaremos la función GridSearchCV de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
+	Para ajustar los hiperparámetros de todos los modelos usaremos la función $GridSearchCV$ de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
 	\subsection{Modelo Lineal}
-	Para el ajuste de los modelos lineales nos centraremos en 2 parámetros que ajustaremos con GridSearchCV: loss, que indicará el modelo ajustado, que podrá ser log (regresión logística) o perceptron, como ya se ha comentado antes; y el factor de regularización, que provocará una regularización más o menos agresiva en función de lo alto que sea.
+	Para el ajuste de los modelos lineales nos centraremos en 2 parámetros que ajustaremos con $GridSearchCV$: loss, que indicará el modelo ajustado, que podrá ser log (regresión logística) o perceptron, como ya se ha comentado antes; y el factor de regularización, que provocará una regularización más o menos agresiva en función de lo alto que sea.
 	\par 
 	A parte de estos parámetros, es importante determinar el tipo de regularización usada, que en este caso será la regularización Lasso, ya que no parece que los atributos estén muy correlados y algunas características podría interesarnos que algunas características influyesen más en el modelo que otras.
 	\par 
@@ -85,7 +102,17 @@ Para evitar mezclar la información del conjunto de entrenamiento con la del de 
 	\subsection{Boosting}
 	El principal parámetro que determinará la calidad de nuestro modelo es el número de estimadores, que indicará el número de etapas de la fase de aprendizaje. Puesto que este método es bastante resistente al sobreajuste, no hará falta hacer muchas pruebas para ajustar este valor, puesto que podemos elegir un número que consideremos lo suficientemente alto sin miedo a pasarnos y obtener un mal ajuste.
 	\par 
-	 El resto de parámetros podemos decir que al igual que con SGDClassifier, modificarlos no afectaría significativamente a la calidad del resultado, por lo que podemos dejarlos con sus valores por defecto.
+	 El resto de parámetros podemos decir que al igual que con $SGDClassifier$, modificarlos no afectaría significativamente a la calidad del resultado, por lo que podemos dejarlos con sus valores por defecto.
+	 \subsection{Random Forest}
+	 Uno de los principales parámetros a tener en cuenta en Random Forest es el número de árboles que se usarán, que en nuestro caso hemos comprobado que el más optimo es 100 debido a que el resultado deja de mejorar a partir de ese punto, entrenando aún así en un tiempo razonable. Otro parámetro a tener en cuenta es el criterio usado al elegir los atributos, teniendo las opciones del criterio Gini y el de la entropía.
+	 \par
+	 El segundo es el que hemos estudiado junto al algoritmo ID3, mientras que el primero tiene en cuenta la probabilidad de que un elemento elegido aleatoriamente quede mal etiquetado si lo hacemos también de manera aleatoria. Como a simple vista no queda claro que técnica es mejor en este caso, se han sometido a validación cruzada, quedando seleccionado el criterio de la entropía.
+	 \par
+	 También existen una serie parámetros relacionados con el criterio de parada para establecer un conjunto de hoja. Como hemos mencionado anteriormente, el entrenamiento no tiene un gran coste en tiempo, por lo que no tiene sentido recortar la generación de ramas. Por ello hemos creído conveniente dejar estos valores de manera que no limiten el proceder del algoritmo, coincidiendo con los valores por defecto.
+	 \par
+	 Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El valor finalmente elegido ha sido el 80\%.
+	 \par
+	 El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
 	
 	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)} % Blanquez (Lasso cuando se pueda)
 	
