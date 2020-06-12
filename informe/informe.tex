@@ -12,39 +12,35 @@
 	
 	% Recordar plantearse cambiar los titulos de las versiones antes de entregar
 
-	\section{Definición del problema a resolver y enfoque elegido} % Blanquez
-	%
-	% Repasar traducciones de las clases, no estoy seguro de losa(brickface) ni de camino(path), que entiendo que es un camino de tierra.
-	%
-	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son brickface(losa), sky(cielo), foliage(follaje), cement(cemento), window(ventana), path(camino) y grass(césped). Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante. 
+	\section{Definición del problema a resolver y enfoque elegido}
+
+	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son brickface(losa), sky(cielo), foliage(follaje), cement(cemento), window(ventana), path(camino) y grass(césped). Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos relacionados con características como el color o el contraste. 
 	\par
 	Con esta información se pretende generar un modelo mediante técnicas de aprendizaje supervisado que prediga correctamente, dada una sección de 3x3 píxeles de una imagen, a que clase de las 7 antes mencionadas pertenece.
 	
-	% Se puede completar con algo más, por ejemplo comentar los atributos
+	\section{Argumentos a favor de la elección de los modelos}
 	
-	\section{Argumentos a favor de la elección de los modelos} % Blanquez
+	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo la primera técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además, ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables. Regresion Logística sin embargo asigna las etiquetas a cada elemento a partir de la probabilidad que tiene de pertenecer a una clase o a otra, lo cual parece ser mejor que Perceptrón probablemente porque el conjunto de entrenamiento no sea ni se acerque a ser linealmente separable.
+		
+	Uno de los modelos no lineales que hemos escogido ha sido Boosting. La idea tras esta técnica es utilizar una gran cantidad de clasificadores simples, de manera que cada clasificador se centra en los errores del clasificador anterior. Uno de los atractivos de Boosting es su simpleza, tanto en dificultad como en complejidad, consiguiendo buenos resultados a pesar de ella. Inicialmente la varianza es muy baja, y con los pasos adecuados se puede conseguir bajar el sesgo en gran medida, por ello y por todas las ventajas de esta técnica esperamos conseguir buenos resultados.
 	
-	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo esta última técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además, ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables.
+	La otra elección de modelo no lineal ha sido Random Forest. Esta técnica se basa en boostrap para generar muestras y crear árboles de decision a partir de ellas. No obstante, para evitar que en todos los árboles se escojan inicialmente las mismas variables, selecciona para cada árbol un subconjunto de ellas aleatoriamente. Así, entre el bagging y esta característica conseguimos rebajar la varianza más que en el resto de técnicas basadas en árboles, que junto al bajo sesgo que consiguen los árboles de decisión, tenemos una técnica que puede proporcionar muy resultados, muy fiables, y además una gran eficiencia debido a su construcción.
 	
-	% Se puede completar más el lineal
-	
-	% Faltan los modelos no lineales
-	
-	\section{Codificación de los datos de entrada para hacerlos útiles a los algoritmos} % Blanquez
+	\section{Codificación de los datos de entrada para hacerlos útiles a los algoritmos}
 	
 	En principio los datos no necesitan ningún tipo de codificación para ser útiles en proceso de aprendizaje, no obstante se ha planteado la conversión de los datos a combinaciones cuadráticas de estos. Sin embargo, tras pruebas usando esta técnica, se ha visto que los resultados mejoran muy poco respecto los valores originales y por lo tanto se ha decidido usar estos últimos, ya que introducir tanta complejidad en el ajuste para una mejora tan irrelevante es incluso contraproducente.
 	\par
 	Si que ha sido necesario codificar la variables de clase, ya que originalmente están especificadas con el nombre del elemento. Para ello hemos creado una función $encodeLabels$ la cual recibe como parámetros el conjunto y un vector con las categorías; este último, si se omite, quedará como un vector vacío. El algoritmo que se usa es simple, para cada variable de clase, si encontramos una categoría nueva la añadimos al vector y cambia su valor el índice del nuevo elemento del vector, si ya lo está, tan solo cambia el valor por el índice de la categoría correspondiente; así se usa para generar el vector de categorías en el conjunto de entrenamiento y, con esa codificación, hacer la misma transformación en el conjunto de test. Al realizarse esta tarea en tiempo de ejecución no es necesario modificar estos valores en los archivos originales. La codificación obtenida, que será útil en posteriores análisis, es la siguiente: $0:BRICKFACE,\ 1:SKY,\ 2:FOLIAGE,\ 3:CEMENT,\ 4:WINDOW,\ 5:PATH,\ 6:GRASS$.
 	\par
-	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales, ya que training consta de 210 instancias mientras que test tiene 10 veces mas, 2100 instancias. 
+	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales, ya que training consta de 210 instancias mientras que test tiene 10 veces más, 2100 instancias. 
 	
-	% Retocar esta parte cuando le preguntemos a Nicolas
+	\section{Valoración del interés de las variables para el problema y selección de un subconjunto (en su caso)}
 	
-	\section{Valoración del interés de la variables para el problema y selección de un subconjunto (en su caso)} % Diego
-	
-	En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema deshechando algunas de ellas o usando una técnica de reducción como PCA.
+	En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema desechando algunas de ellas o usando una técnica de reducción como PCA.
 	\par 
 	Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
+	\par
+	También vamos a usar la función $LocalOutlierFactor$ para eliminar outliers. Hemos dejado que calcule el grado de contaminación resultante con el algoritmo que incorpora para ello y se han eliminado los valores que ha marcado como outliers, haciendo así que el ajuste posterior sea más fiable.
 	
 	\section{Normalización de las variables(en su caso)} % Diego
 	
@@ -58,9 +54,13 @@
 	\par 
 	Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
-	\section{Justificación de la función de pérdida usada} % Blanquez
+	\section{Justificación de la función de pérdida usada}
 	
-	% zero_one_loss y matriz de confusion
+	Como métrica de errores vamos a usar dos:
+	\begin{enumerate}
+		\item $zero\_one\_loss$, la cual es una medida estándar de error en clasificación. Ésta proporciona una medición de los valores que pertenecen a una clase concreta y el clasificador las ha etiquetado en otra, es decir, de los elementos mal clasificados. La hemos elegido porque es una medida simple y que proporciona claramente un valor real del error.
+		\item Matrices de confusión, las cuales nos proporcionan información con la que podemos estudiar qué clases son las más problemáticas para nuestros modelos y sacar información más detallada a cerca de la precisión del ajuste.
+	\end{enumerate}
 	
 	\section{Selección de las técnica (paramétrica) y valoración de la idoneidad de la misma frente a otras alternativas} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
 	
@@ -101,9 +101,9 @@
 	\par
 	El segundo es el que hemos estudiado junto al algoritmo ID3, mientras que el primero tiene en cuenta la probabilidad de que un elemento elegido aleatoriamente quede mal etiquetado si lo hacemos también de manera aleatoria. Como a simple vista no queda claro qué técnica es mejor en este caso, se han sometido a validación cruzada, quedando seleccionado el criterio de la entropía.
 	\par
-	También existen una serie parámetros relacionados con el criterio de parada para establecer un conjunto de hoja. Como hemos mencionado anteriormente, el entrenamiento no tiene un gran coste en tiempo, por lo que no tiene sentido recortar la generación de ramas. Por ello hemos creído conveniente dejar estos valores de manera que no limiten el proceder del algoritmo, coincidiendo con los valores por defecto.
+	También existen una serie parámetros relacionados con el criterio de parada para establecer un conjunto de hoja. Como hemos mencionado anteriormente, el entrenamiento no tiene un gran coste en tiempo, por lo que no tiene sentido recortar la generación de ramas, tampoco por problemas de sobreajusta ya que no se han encontrado. Por ello hemos creído conveniente dejar estos valores de manera que no limiten el proceder del algoritmo, coincidiendo con los valores por defecto.
 	\par
-	Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El valor finalmente elegido ha sido el 80\%.
+	Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. Aunque la raíz cuadrada es el valor estándar, el valor que propone un mejor resultado y finalmente elegido ha sido el 80\%.
 	\par
 	El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
 	

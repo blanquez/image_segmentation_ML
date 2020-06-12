@@ -92,8 +92,8 @@ print("--------- CLASIFICACIÓN ---------")
 # Lectura de datos
 print("\nLeyendo datos...")
 
-x_train = readRawFile("datos/segmentation.tes")
-x_test = readRawFile("datos/segmentation.tra")
+x_train = readRawFile("datos/segmentation.data")
+x_test = readRawFile("datos/segmentation.test")
 
 x_train, y_train = extractLabels(x_train,0)
 x_test, y_test = extractLabels(x_test,0)
@@ -121,10 +121,10 @@ x_test, y_test = tratar_outliers(x_test,y_test)
 #x_train, x_test = reducir(x_train, x_test)
 
 # Complementación clase de funciones
-print("Calculando clase de funciones...")
+#print("Calculando clase de funciones...")
 
-x_train_sq = transformar_polinomial(x_train,2)
-x_test_sq = transformar_polinomial(x_test,2)
+#x_train_sq = transformar_polinomial(x_train,2)
+#x_test_sq = transformar_polinomial(x_test,2)
 
 #----------------------------------------------------------
 #                 Modelo Lineal
@@ -223,9 +223,8 @@ print("\n Random Forest: ")
 ne = [100]
 c = ['gini', 'entropy']
 mf = ['auto', 'log2', 0.6, 0.7, 0.8, 0.9]
-b = [True, False]
 
-parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf, 'bootstrap' : b}
+parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf}
 
 rforest = RandomForestClassifier()
 
