@@ -10,78 +10,60 @@
 
 	\maketitle
 	
-	% La organización en secciones es solo pa organizarme, luego se puede reestructurar todo
-	
-	% A TENER EN CUENTA
-	
-	% ¿en qué momento regularizamos?
-	% Lo suyo seria hablar de Regularizacion en general en su apartado, si solo tiene sentido 
-	%		en modelo lineal deberiamos quitar el apartado
-	% Cuidado con 'es suficiente con' o 'pensamos que está bien' dejar los parámetros por
-	%		defecto, especifica claramente que hay que especificar el uso de los parámetros
-	% 		y no vale el argumento de 'están por defecto' (es Nicolas), yo los he nombrado todos
-	% 		más o menos y explicado porque se dejan por defecto o se elige algún valor o decir
-	%		que no queda claro y se somete a validación cruzada
-	% MLP no esta en la memoria y dice el commiy que si no? O se ha jodido algo?
-	% El punto 6 entiendo que se refiere al uso de zero_one_loss y matrices de confusion no?
-	%		Lo hago otro dia cuando lo tenga claro
+	% Recordar plantearse cambiar los titulos de las versiones antes de entregar
 
 	\section{Definición del problema a resolver y enfoque elegido} % Blanquez
 	%
 	% Repasar traducciones de las clases, no estoy seguro de losa(brickface) ni de camino(path), que entiendo que es un camino de tierra.
 	%
-	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son losa, cielo, follaje, cemento, ventana, camino y césped. Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante. 
+	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son brickface(losa), sky(cielo), foliage(follaje), cement(cemento), window(ventana), path(camino) y grass(césped). Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos que se detallarán más adelante. 
 	\par
 	Con esta información se pretende generar un modelo mediante técnicas de aprendizaje supervisado que prediga correctamente, dada una sección de 3x3 píxeles de una imagen, a que clase de las 7 antes mencionadas pertenece.
-	%
-	% Se puede completar con algo más	
+	
+	% Se puede completar con algo más, por ejemplo comentar los atributos
 	
 	\section{Argumentos a favor de la elección de los modelos} % Blanquez
 	
 	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo esta última técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además, ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables.
 	
-	% Se puede completar más el lineal cuando confirmemos su uso
+	% Se puede completar más el lineal
 	
-	% Faltan los modelos no lineales, aún no elegidos
+	% Faltan los modelos no lineales
 	
 	\section{Codificación de los datos de entrada para hacerlos útiles a los algoritmos} % Blanquez
 	
-	% Controlamos las primeras líneas de los archivos que no son datos?
+	En principio los datos no necesitan ningún tipo de codificación para ser útiles en proceso de aprendizaje, no obstante se ha planteado la conversión de los datos a combinaciones cuadráticas de estos. Sin embargo, tras pruebas usando esta técnica, se ha visto que los resultados mejoran muy poco respecto los valores originales y por lo tanto se ha decidido usar estos últimos, ya que introducir tanta complejidad en el ajuste para una mejora tan irrelevante es incluso contraproducente.
+	\par
+	Si que ha sido necesario codificar la variables de clase, ya que originalmente están especificadas con el nombre del elemento. Para ello hemos creado una función $encodeLabels$ la cual recibe como parámetros el conjunto y un vector con las categorías; este último, si se omite, quedará como un vector vacío. El algoritmo que se usa es simple, para cada variable de clase, si encontramos una categoría nueva la añadimos al vector y cambia su valor el índice del nuevo elemento del vector, si ya lo está, tan solo cambia el valor por el índice de la categoría correspondiente; así se usa para generar el vector de categorías en el conjunto de entrenamiento y, con esa codificación, hacer la misma transformación en el conjunto de test. Al realizarse esta tarea en tiempo de ejecución no es necesario modificar estos valores en los archivos originales. La codificación obtenida, que será útil en posteriores análisis, es la siguiente: $1:BRICKFACE,\ 2:SKY,\ 3:FOLIAGE,\ 4:CEMENT,\ 5:WINDOW,\ 6:PATH,\ 7:GRASS$.
+	\par
+	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales. Creemos que esto es debido a que al ser fotos particionadas, el conjunto de entrenamiento basta que conste con una imagen para que se ajuste la función correctamente y así tener un conjunto mayor de test y así conseguir un $E_{test}$ más fiable. De hecho hemos probado a intercambiar los conjuntos y todas las técnicas producen overfitting.
 	
-	En principio los datos no necesitan ningún tipo de codificación para ser útiles en proceso de aprendizaje, no obstante se han convertido los datos a combinaciones cuadráticas de estos. Así damos potencia al ajuste ya que, aunque estén ajustados por un modelo lineal, los datos podrán estar clasificados como funciones cuadráticas. Para ello se ha hecho uso de la función $Polynomial\_Features$ del módulo $Preprocessing$ de Scikit-Learn, pasándole como parámetro el exponente 2 para obtener la susodicha combinación.
-	
-	%	Se ha hecho el siguiente cambio en los archivos originales
-	%	.data -$>$ .tes
-	%	.test -$>$ .tra
-	%	ya que antes había 210 en tra y 2100 en test
-	%
-	%	En segmentation.names especifica que la distribución anterior es correcta, por qué?
+	% Retocar esta parte cuando le preguntemos a Nicolas
 	
 	\section{Valoración del interés de la variables para el problema y selección de un subconjunto (en su caso)} % Diego
 	
-En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema deshechando algunas de ellas o usando una técnica de reducción como PCA.
-\par 
-Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
-	
-	%	El resto parecen ser medidas sobre la geometría y el color de la imagen, y por lo tanto necesarias
+	En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema deshechando algunas de ellas o usando una técnica de reducción como PCA.
+	\par 
+	Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
 	
 	\section{Normalización de las variables(en su caso)} % Diego
-	Puesto que el rango de los atributos varia de unos a otros es importante reescalar cada uno de forma independiente para poder compararlos mejor y no darle más o menos peso a cada atributo en función de su tamaño. Para esto usaremos una escala min-max que para cada atributo $x_i$ perteneciente a la muestra i calcula:
-\begin{equation}
-x_i' = \frac{x_i-min}{max-min}
-\end{equation}
-\indent Donde min y max son los valores mínimo y máximo del atributo en toda la muestra.
-\par 
-Este tipo de escala mantiene la distribución de los valores, pero los ajusta a un rango entre 0 y 1.  Si supiéramos que los datos se siguen un tipo de distribución como la distribución normal podríamos usar otras formas de normalización, pero este no parece ser el caso, por lo que usar estas otras técnicas modificaría la distribución de la muestra y provocaría un peor ajuste.
-\par 
-Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
+	Puesto que el rango de los atributos varia de unos a otros es importante reescalar cada uno de forma independiente para poder compararlos mejor y no darle más o menos peso a cada atributo en función de su tamaño. Para esto usaremos una escala min-max que para cada atributo $x_i$ perteneciente a la muestra i calcula:
+	\begin{equation}
+	x_i' = \frac{x_i-min}{max-min}
+	\end{equation}
+	\indent Donde min y max son los valores mínimo y máximo del atributo en toda la muestra.
+	\par 
+	Este tipo de escala mantiene la distribución de los valores, pero los ajusta a un rango entre 0 y 1.  Si supiéramos que los datos se siguen un tipo de distribución como la distribución normal podríamos usar otras formas de normalización, pero este no parece ser el caso, por lo que usar estas otras técnicas modificaría la distribución de la muestra y provocaría un peor ajuste.
+	\par 
+	Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
 	\section{Justificación de la función de pérdida usada} % Blanquez
 	
-	
+	% zero_one_loss y matriz de confusion
 	
 	\section{Selección de las técnica (paramétrica) y valoración de la idoneidad de la misma frente a otras alternativas} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
+	
 	\subsection{Modelo Lineal}
 	Para ajustar el modelo lineal vamos a usar la función de la biblioteca sklearn del gradiente descendente estocástico $SGDClassifier$. Vamos a comparar entre 2 modelos diferentes, y decidiremos cual es mejor en tiempo de ejecución. Los modelos que vamos a comparar son regresión logística y la implementación que usa la biblioteca del Perceptrón.
 	\par 
@@ -92,6 +74,7 @@ Para evitar mezclar la información del conjunto de entrenamiento con la del de 
 	En el caso de Random Forest vamos a usar la versión estándar de scikit-learn para clasificación: $RandomForestClassifier$, del módulo $ensemble$. Se plantean otras alternativas nombradas como árboles extremadamente aleatorizados, sin embargo en este caso no nos interesan ya que este conjunto de datos es lo suficientemente simple como para poder generar un número de árboles que nos garantice una buena varianza en un tiempo razonable. Es por esto por lo que no nos interesa una técnica que fuerza más la aleatoriedad en pos de generar varianza a costa de sesgo.
 	
 	\section{Aplicación de la técnica especificando claramente que algoritmos se usan en la estimación de los parámetros, los hiperparámetros y el error de generalización.} % Diego - Lineal - No lineal 1 / Blanquez - No lineal 2
+	
 	Para ajustar los hiperparámetros de todos los modelos usaremos la función $GridSearchCV$ de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
 	\subsection{Modelo Lineal}
 	Para el ajuste de los modelos lineales nos centraremos en 2 parámetros que ajustaremos con $GridSearchCV$: loss, que indicará el modelo ajustado, que podrá ser log (regresión logística) o perceptron, como ya se ha comentado antes; y el factor de regularización, que provocará una regularización más o menos agresiva en función de lo alto que sea.
@@ -100,29 +83,28 @@ Para evitar mezclar la información del conjunto de entrenamiento con la del de 
 	\par 
 	El resto de parámetros que usa la función sirven para acelerar el proceso de aprendizaje (a veces a costa de obtener peores resultados), fijar una solución inicial o determinar las condiciones de parada. Puesto que estos factores sirven más para reducir el tiempo de ejecución que para mejorar el ajuste, y dado que el tiempo de ejecución no es excesivamente alto, no hay necesidad de cambiar los valores que vienen asignados por defecto.
 	\par 
-	Al ejecutar el programa, la mejor combinación de parámetros nos da  $E_{val} = 0.1487$ y $E_{test} = 0.1264$, valores que no distan mucho del error dentro de la muestra $E_{in} = 0.0974$. Como era de esperar, $E_{val}$ es ligeramente mayor que $E_{test}$, ya que usa menos instancias de entrenamiento, aunque también hay que tener en cuenta un ligero margen por el ruido y la aleatoriedad de la técnica usada. Al tratarse de un problema con 7 clases podemos considerar un error cercano al 12\% como un buen comienzo, ya que la relativa simpleza de los modelos lineales va limitar la calidad de los resultados que obtengamos en muchos problemas.
+	Al ejecutar el programa, la mejor combinación de parámetros nos da  $E_{val} = 0.1487$ y $E_{test} = 0.1264$, valores que no distan mucho del error dentro de la muestra $E_{in} = 0.0974$. Como era de esperar, $E_{val}$ es ligeramente mayor que $E_{test}$, ya que usa menos instancias de entrenamiento, aunque también hay que tener en cuenta un ligero margen por el ruido y la aleatoriedad de la técnica usada. Al tratarse de un problema con 7 clases podemos considerar un error cercano al 12\% como un buen comienzo, ya que la relativa simpleza de los modelos lineales va limitar la calidad de los resultados que obtengamos en muchos problemas. La misma conclusión podemos sacar de las matrices de confusión, tanto para la muestra de entrenamiento como para la de test, donde se puede apreciar que en la mayoría de casos se obtiene un resultado razonablemente bueno; no obstante creemos necesario remarcar a la vista de estos que la mayoría de errores son del mismo tipo, ya que en el resto de casos son errores poco relevantes. En concreto, este modelo lineal clasifica gran parte de elementos pertenecientes a la clase Foliage(follaje) como Window(ventana), por lo que probablemente esté en los elementos de esta clase el margen de mejora que puedan introducir los modelos no lineales.
 	\subsection{Boosting}
 	El principal parámetro que determinará la calidad de nuestro modelo es el número de estimadores, que indicará el número de etapas de la fase de aprendizaje. Puesto que este método es bastante resistente al sobreajuste, no hará falta hacer muchas pruebas para ajustar este valor, puesto que podemos elegir un número que consideremos lo suficientemente alto sin miedo a pasarnos y obtener un mal ajuste. En este caso, el número elegido es 100, ya que a partir de este número no parece haber una diferencia significativa más allá de las variaciones posibles por la aleatoriedad del sistema.
 	\par 
 	Para regularizar usaremos 3 atributos principalmente, la tasa de aprendizaje, el tamaño de la submuestra que usamos para el entrenamiento, y el número máximo de atributos en cada partición. Estimaremos su valor usando grid search, pero en el siguiente apartado hablaremos con más detalle sobre esto.
 	\par 
-	 El resto de parámetros, al igual que con $SGDClassifier$, podemos decir que modificarlos no afectaría significativamente a la calidad del resultado, por lo que podemos dejarlos con sus valores por defecto.
-	 \subsection{Random Forest}
-	 Uno de los principales parámetros a tener en cuenta en Random Forest es el número de árboles que se usarán, que en nuestro caso hemos comprobado que el más optimo es 100 debido a que el resultado deja de mejorar a partir de ese punto, entrenando aún así en un tiempo razonable. Otro parámetro a tener en cuenta es el criterio usado al elegir los atributos, teniendo las opciones del criterio Gini y el de la entropía.
-	 \par
-	 El segundo es el que hemos estudiado junto al algoritmo ID3, mientras que el primero tiene en cuenta la probabilidad de que un elemento elegido aleatoriamente quede mal etiquetado si lo hacemos también de manera aleatoria. Como a simple vista no queda claro qué técnica es mejor en este caso, se han sometido a validación cruzada, quedando seleccionado el criterio de la entropía.
-	 \par
-	 También existen una serie parámetros relacionados con el criterio de parada para establecer un conjunto de hoja. Como hemos mencionado anteriormente, el entrenamiento no tiene un gran coste en tiempo, por lo que no tiene sentido recortar la generación de ramas. Por ello hemos creído conveniente dejar estos valores de manera que no limiten el proceder del algoritmo, coincidiendo con los valores por defecto.
-	 \par
-	 Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El valor finalmente elegido ha sido el 80\%.
-	 \par
-	 El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
+	El resto de parámetros, al igual que con $SGDClassifier$, podemos decir que modificarlos no afectaría significativamente a la calidad del resultado, por lo que podemos dejarlos con sus valores por defecto.
+	\subsection{Random Forest}
+	Uno de los principales parámetros a tener en cuenta en Random Forest es el número de árboles que se usarán, que en nuestro caso hemos comprobado que el más optimo es 100 debido a que el resultado deja de mejorar a partir de ese punto, entrenando aún así en un tiempo razonable. Otro parámetro a tener en cuenta es el criterio usado al elegir los atributos, teniendo las opciones del criterio Gini y el de la entropía.
+	\par
+	El segundo es el que hemos estudiado junto al algoritmo ID3, mientras que el primero tiene en cuenta la probabilidad de que un elemento elegido aleatoriamente quede mal etiquetado si lo hacemos también de manera aleatoria. Como a simple vista no queda claro qué técnica es mejor en este caso, se han sometido a validación cruzada, quedando seleccionado el criterio de la entropía.
+	\par
+	También existen una serie parámetros relacionados con el criterio de parada para establecer un conjunto de hoja. Como hemos mencionado anteriormente, el entrenamiento no tiene un gran coste en tiempo, por lo que no tiene sentido recortar la generación de ramas. Por ello hemos creído conveniente dejar estos valores de manera que no limiten el proceder del algoritmo, coincidiendo con los valores por defecto.
+	\par
+	Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El valor finalmente elegido ha sido el 80\%.
+	\par
+	El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
 	
-	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)} % Blanquez 
+	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)} % Blanquez
+	
 	\subsection{Modelos Lineales}
 	Puesto que estamos ante un problema en el que algunos atributos pueden ser más importantes que otros y que no están del todo correlados entre si, la regularización Lasso es la mejor elección que podemos tomar. Este tipo de regularización limita el valor que puede tener la suma de los valores absolutos del peso de cada atributo, haciendo que algunos de ellos tiendan a 0 y por lo tanto se tengan menos en cuenta en el modelo. Esto permitirá que nuestra función se centre mejor en los elementos que mejor sirven para diferenciar las imágenes, reduciendo el ruido que aportarían otros atributos más innecesarios.
-	
-	
 	
 	\section{Valoración de los resultados ( gráficas, métricas de error, análisis de residuos, etc )} % Hacer juntos al final
 	
