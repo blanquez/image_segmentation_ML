@@ -106,6 +106,9 @@ removeAtribute(x_test, 2)
 
 y_train, cat = encodeLabels(y_train)
 y_test, cat = encodeLabels(y_test, categories = cat)
+print("Codificación de las etiquetas:")
+for i in range(len(cat)):
+    print(i, ": ",cat[i])
 
 # Preprocesado
 print("Preprocesando datos...")
@@ -188,13 +191,13 @@ input("\nPulse una tecla para continuar\n")
 # #----------------------------------------------------------
 print("\n Boosting: ")
 
-sub = (0.9, 0.99)
-max_f = (2,3,4)
-lr = (0.1,0.01)
+sub = (0.9, 0.5, 0.3)
+max_f = ('sqrt', 0.5, 1.0)
+lr = (0.1,0.5)
 
 parameters = {'subsample' : sub, 'max_features' : max_f, 'learning_rate' : lr}
 
-gbc = GradientBoostingClassifier(n_estimators = 150)
+gbc = GradientBoostingClassifier(n_estimators = 100)
 
 sg = GridSearchCV(gbc, parameters, scoring = 'accuracy', cv = 5, iid = False)
 
