@@ -104,14 +104,14 @@ dataToFloat(x_test)
 removeAtribute(x_train, 2)
 removeAtribute(x_test, 2)
 
+# Preprocesado
+print("Preprocesando datos...")
+
 y_train, cat = encodeLabels(y_train)
 y_test, cat = encodeLabels(y_test, categories = cat)
 print("Codificación de las etiquetas:")
 for i in range(len(cat)):
     print(i, ": ",cat[i])
-
-# Preprocesado
-print("Preprocesando datos...")
 
 x_train, x_test = normalizar(x_train, x_test)
 
@@ -223,8 +223,9 @@ print("\n Random Forest: ")
 ne = [100]
 c = ['gini', 'entropy']
 mf = ['auto', 'log2', 0.6, 0.7, 0.8, 0.9]
+md = [8]
 
-parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf}
+parameters = {'n_estimators' : ne, 'criterion' : c, 'max_features' : mf, 'max_depth' : md}
 
 rforest = RandomForestClassifier()
 
