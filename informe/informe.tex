@@ -2,6 +2,7 @@
 \usepackage{indentfirst}
 \usepackage{float} 
 \usepackage{graphicx}
+\usepackage{amsmath}
 
 \title{AJUSTE DE PREDICTOR PARA IMAGE SEGMENTATION DATA SET}
 \author{Antonio José Blánquez Pérez, Diego Navarro Cabrera}
@@ -14,7 +15,7 @@
 	
 	% Recordar plantearse cambiar los titulos de las versiones antes de entregar
 
-	\section{Definición del problema a resolver y enfoque elegido}
+	\section{Definición del problema y enfoque elegido}
 
 	La base de datos seleccionada es Image Segmentation Data Set, creada por el Vision Group perteneciente a la Universidad de Massachusetts. Está formada por varias fotografías recogidas de 7 bases de datos que contienen distintos elementos al aire libre, los cuales son brickface(losa), sky(cielo), foliage(follaje), cement(cemento), window(ventana), path(camino) y grass(césped). Cada imagen ha sido segmentada a mano de manera que cada instancia de nuestra base de datos es una región de 3x3 píxeles de alguna de ellas, teniendo cada una 19 atributos relacionados con características como el color o el contraste. 
 	\par
@@ -36,13 +37,13 @@
 	\par
 	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales, ya que training consta de 210 instancias mientras que test tiene 10 veces más, 2100 instancias. Lo más probable es que esta proporción sea así porque se estima que esas 210 muestras (30 de cada clase) son suficientes para tener una imagen general de la fotografía que se quiere clasificar y por lo tanto son suficientes para ajustar el modelo. El gran número de instancias en el conjunto de prueba sirve para obtener una estimación fiable del error fuera de la muestra, ya que un 20\% o 30\% del tamaño del conjunto de entrenamiento podría ser poco incluso para un problema relativamente sencillo como este.
 	
-	\section{Valoración del interés de las variables para el problema y selección de un subconjunto (en su caso)}
+	\section{Valoración del interés de las variables}
 	
 	En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema desechando algunas de ellas o usando una técnica de reducción como PCA.
 	\par 
 	Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
 	
-	\section{Normalización de las variables(en su caso)} % Diego
+	\section{Normalización de las variables} % Diego
 	
 	Puesto que el rango de los atributos varia de unos a otros es importante reescalar cada uno de forma independiente para poder compararlos mejor y no darle más o menos peso a cada atributo en función de su tamaño. Para esto usaremos una escala min-max que para cada atributo $x_i$ perteneciente a la muestra i calcula:
 	\begin{equation}
@@ -62,7 +63,7 @@
 		\item Matrices de confusión, las cuales nos proporcionan información con la que podemos estudiar qué clases son las más problemáticas para nuestros modelos y sacar información más detallada a cerca de la precisión del ajuste.
 	\end{enumerate}
 	
-	\section{Selección de las técnica (paramétrica) y valoración de la idoneidad de la misma frente a otras alternativas}
+	\section{Selección de técnicas y valoración de la idoneidad de cada una frente a otras alternativas}
 	
 	\subsection{Modelo Lineal}
 	Para ajustar el modelo lineal vamos a usar la función de la biblioteca sklearn del gradiente descendente estocástico $SGDClassifier$. Vamos a comparar entre 2 modelos diferentes, y decidiremos cual es mejor en tiempo de ejecución. Los modelos que vamos a comparar son regresión logística y la implementación que usa la biblioteca del Perceptrón.
@@ -73,7 +74,7 @@
 	\subsection{Random Forest}
 	En el caso de Random Forest vamos a usar la versión estándar de scikit-learn para clasificación: $RandomForestClassifier$, del módulo $ensemble$. Se plantean otras alternativas nombradas como árboles extremadamente aleatorizados, sin embargo en este caso no nos interesan ya que este conjunto de datos es lo suficientemente simple como para poder generar un número de árboles que nos garantice una buena varianza en un tiempo razonable. Es por esto por lo que no nos interesa una técnica que fuerza más la aleatoriedad en pos de bajar varianza a costa de sesgo.
 	
-	\section{Aplicación de la técnica especificando claramente que algoritmos se usan en la estimación de los parámetros, los hiperparámetros y el error de generalización.}
+	\section{Aplicación de la técnica: estimación de los parámetros, hiperparámetros y el error de generalización}
 	
 	Para ajustar los hiperparámetros de todos los modelos usaremos la función $GridSearchCV$ de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
 	\subsection{Modelo Lineal}
@@ -105,9 +106,9 @@
 	\par
 	Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El resultado, lejos de sorprender, es que la raíz cuadrada da el mejor resultado, por algo es el valor por defecto y el que se usa usualmente para esta técnica. El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
 	\par
-	Tras la ejecución se han obtenido los siguiente resultados: $E_{val} = 0.0571$, $E_{test} = 0.0528$ y $E_{in} = 0.0047$. El valor de $E_{val}$ es ligeramente mayor de lo esperado pero, como ya se ha comentado, es una consecuencia del tamaño del conjunto de entrenamiento. Podemos llegar a la misma conclusión que en el caso de Boosting, el error en la muestra tan bajo podría denotar un sobreajuste, sin embargo el modelo de entrenamiento es lo suficientemente simple para ajustar el error tan cercano a 0 con un modelo como Random Forest; $E_{test}$ es lo suficientemente bajo como para concluir que el resultado es satisfactorio, tan solo un error del 5.2\%.
+	Tras la ejecución se han obtenido los siguiente resultados: $E_{val} = 0.0571$, $E_{test} = 0.0528$ y $E_{in} = 0.0047$. Podemos llegar a la misma conclusión que en el caso de Boosting, el error en la muestra tan bajo podría denotar un sobreajuste, sin embargo el modelo de entrenamiento es lo suficientemente simple para ajustar el error tan cercano a 0 con un modelo como Random Forest; $E_{test}$ es lo suficientemente bajo como para concluir que el resultado es satisfactorio, tan solo un error del 5.2\%.
 	
-	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)}
+	\section{Regularización}
 	
 	\subsection{Modelos Lineales}
 	Puesto que estamos ante un problema en el que algunos atributos pueden ser más importantes que otros y no están del todo correlados entre si, la regularización Lasso es la mejor elección que podemos tomar. Este tipo de regularización limita el valor que puede tener la suma de los valores absolutos del peso de cada atributo, haciendo que algunos de ellos tiendan a 0 y por lo tanto se tengan menos en cuenta en el modelo. Esto permitirá que nuestra función se centre mejor en los elementos que mejor sirven para diferenciar las imágenes, reduciendo el ruido que aportarían otros atributos más innecesarios.
@@ -124,26 +125,88 @@
 	
 	\section{Valoración de los resultados} % Hacer juntos al final
 	Los resultados finales obtenidos para cada modelo son los siguientes:
-	
-\begin{figure}[H]
-  \includegraphics[width=\linewidth]{Imagenes/CE.png}
-  %\caption{Comparativa}
-  \label{fig:boat1}
-\end{figure}
-
+	\begin{figure}[H]
+	  \includegraphics[width=\linewidth]{Imagenes/CE.png}
+	  %\caption{Comparativa}
+	  \label{fig:boat1}
+	\end{figure}
 	Como se puede ver, los modelos no lineales nos ofrecen un ajuste claramente mejor que el del modelo lineal, como era de esperar gracias a su mayor capacidad de separar los datos y a su propio diseño pensado para reducir la varianza y evitar el sobreajuste usando numerosos estimadores o arboles para producir una predicción fiable. 
 	\par 
 	Por otro lado, podríamos decir que el modelo que mejor resultado nos ha dado es Random Forest, sin embargo, la diferencia de este con Boosting es lo suficientemente pequeña como para que no podamos estar seguros de que esta sea una diferencia real y no solo un producto del azar inherente a estos modelos. Como se puede ver, tanto un modelo como el otro comparten el mismo $E_{val}$, a pesar de que el error de prueba de RF sea menor. Aun con todo, si tuviésemos que elegir un modelo de entre los que hemos usado, eligiríamos RF ya que aún con todo es el que mejor resultado nos ha dado.
+	\par
+	Estudiemos ahora las matrices de confusión(izquierda $E_{in}$, derecha ${E_{test}}$):
 	
-	%Tratamiento de residuos (BLANQUEZ)
-	La misma conclusión podemos sacar de las matrices de confusión, tanto para la muestra de entrenamiento como para la de test, donde se puede apreciar que en la mayoría de casos se obtiene un resultado razonablemente bueno; no obstante creemos necesario remarcar a la vista de estos que la mayoría de errores son del mismo tipo, ya que en el resto de casos son errores poco relevantes. En concreto, este modelo tiende a clasificar erróneamente erróneamente algunas imágenes como si perteneciesen a la clase ventana (WINDOW), especialmente en el caso de la imagen del follaje (FOLIAGE) para el que clasifica mal aproximadamente la mitad de las instancias. Esto puede hacernos pensar que la imagen del follaje y la de la ventana se parezcan en los factores que más tiene en cuenta el modelo y que esto pueda estar dificultando su separación. %Como ejemplo para hacer el razonamiento conjunto más adelante.
+	\begin{equation}
+		\begin{pmatrix}
+			29 & 0 & 0 & 0 & 1 & 0 & 0\\
+			0 & 30 & 0 & 0 & 0 & 0 & 0\\
+			0 & 0 & 24 & 0 & 6 & 0 & 0\\
+			0 & 0 & 1 & 23 & 2 & 4 & 0\\
+			0 & 0 & 4 & 0 & 26 & 0 & 0\\
+			0 & 0 & 0 & 0 & 0 & 30 & 0\\
+			0 & 0 & 0 & 0 & 0 & 0 & 30
+		\end{pmatrix}
+		\begin{pmatrix}
+		282 & 0 & 1 & 13 & 4 & 0 & 0\\
+		0 & 300 & 0 & 0 & 0 & 0 & 0\\
+		0 & 0 & 223 & 2 & 75 & 0 & 0\\
+		1 & 1 & 3 & 202 & 26 & 67 & 0\\
+		1 & 0 & 52 & 7 & 236 & 4 & 0\\
+		0 & 0 & 0 & 0 & 0 & 300 & 0\\
+		0 & 0 & 0 & 0 & 0 & 3 & 297
+		\end{pmatrix}
+	\end{equation}
+	
+	\begin{equation}
+	\begin{pmatrix}
+	30 & 0 & 0 & 0 & 0 & 0 & 0\\
+	0 & 30 & 0 & 0 & 0 & 0 & 0\\
+	0 & 0 & 30 & 0 & 0 & 0 & 0\\
+	0 & 0 & 0 & 30 & 0 & 0 & 0\\
+	0 & 0 & 0 & 0 & 30 & 0 & 0\\
+	0 & 0 & 0 & 0 & 0 & 30 & 0\\
+	0 & 0 & 0 & 0 & 0 & 0 & 30
+	\end{pmatrix}
+	\begin{pmatrix}
+	281 & 0 & 0 & 16 & 3 & 0 & 0\\
+	0 & 300 & 0 & 0 & 0 & 0 & 0\\
+	1 & 0 & 270 & 4 & 25 & 0 & 0\\
+	2 & 0 & 3 & 283 & 11 & 1 & 0\\
+	1 & 0 & 29 & 22 & 248 & 0 & 0\\
+	0 & 0 & 1 & 5 & 0 & 294 & 0\\
+	1 & 0 & 1 & 0 & 0 & 1 & 297
+	\end{pmatrix}
+	\end{equation}
+	
+	\begin{equation}
+	\begin{pmatrix}
+	29 & 0 & 0 & 0 & 1 & 0 & 0\\
+	0 & 30 & 0 & 0 & 0 & 0 & 0\\
+	0 & 0 & 30 & 0 & 0 & 0 & 0\\
+	0 & 0 & 0 & 30 & 0 & 0 & 0\\
+	0 & 0 & 0 & 0 & 30 & 0 & 0\\
+	0 & 0 & 0 & 0 & 0 & 30 & 0\\
+	0 & 0 & 0 & 0 & 0 & 0 & 30
+	\end{pmatrix}
+	\begin{pmatrix}
+	286 & 0 & 0 & 11 & 3 & 0 & 0\\
+	0 & 300 & 0 & 0 & 0 & 0 & 0\\
+	2 & 1 & 276 & 8 & 13 & 0 & 0\\
+	2 & 0 & 0 & 278 & 17 & 3 & 0\\
+	2 & 0 & 31 & 9 & 258 & 0 & 0\\
+	0 & 0 & 0 & 6 & 0 & 294 & 0\\
+	0 & 0 & 0 & 0 & 0 & 3 & 297
+	\end{pmatrix}
+	\end{equation}
+	
+	En primer lugar analizaremos las matrices en el caso del modelo lineal $(2)$, donde podemos ver que los errores se concentran claramente, tanto en entrenamiento como en test, en las clases FOLIAGE, CEMENT y WINDOW, dando el resto muy buenos resultados aun con modelos lineales. En el caso de CEMENT hablamos incluso de un tercio de los elementos mal clasificados, por lo que será en estas tres clases donde deberá destacar el uso de modelos no lineales. El resto de elementos mal clasificados no es demasiado remarcable, son errores asumibles en un resultado satisfactorio. Es posible concluir también a partir de estos detalles que las imágenes de las clases FOLIAGE y WINDOW parecen las más difíciles de separar, la clase CEMENT sin embargo parece confundirse también con WINDOW y con PATH.
 	\par 
-	En el proceso de selección se han sacado algunas conclusiones, como que para el número de atributos la profundidad de los árboles más grandes sigue siendo correcta, además de que aunque se regularice el resultado no mejora en gran medida, lo que quiere decir que los datos no son dados al sobreajuste % Hablar del ruido, sobreajuste y regularizacion
+	Si comparamos el comportamiento anterior con el presente en Boosting y RF $(3)(4)$ se pueden ver distintas mejoras. La más evidente es que el problema con la clase CEMENT, aunque sigue quedando algo presente, ha mejorado en gran medida; si antes no era para nada un buen resultado ahora podemos afirmar que es etiquetado de manera satisfactoria dentro de un margen de error asumible. De la misma manera se puede observar y confirmar que la dificultad de separar las clases FOLIAGE y WINDOW queda presente, añadiendo el aliciente de que con estos dos modelos la clasificación en la muestra de entrenamiento es prácticamente perfecta. Esto deja patente que es difícil separar ambas clases bajo los atributos manejados en este estudio y que por tanto, junto a la clase CEMENT y en algún caso BRICKFACE, son las que afectan principalmente al error ya estudiado. No obtstante los resultados, tanto de Boosting como de RF, mejoran en gran medida al modelo lineal y proporcionan un ajuste, al menos en nuestra opinión, de calidad.
 	
-	\section{Justificar que se ha obtenido la mejor de las posibles soluciones con la técnica elegida y la muestra dada. Argumentar en términos de los errores de ajuste y generalización} % Hacer juntos al final
+	\section{Conclusiones}
 	Como ya se ha hablado antes, cada modelo se ha ajustado buscando los mejores parámetros posibles y se han tomado las medidas necesarias para asegurar que el error calculado con el conjunto de prueba es lo más fiable posible, de forma que el modelo que nos devuelva una menor tasa de error debería ser el mejor de entre las soluciones posibles. Dicho esto, la naturaleza aleatoria del proceso siempre puede afectar ligeramente a los resultados , y puesto que solo podemos estimar $E_{out}$, nunca saber su valor real, bajo condiciones ligeramente diferentes podríamos estimar como óptimos otros parámetros e incluso otros modelos, ya que como hemos dicho antes, la diferencia entre Boosting y Random Forest no es tan grande como para asegurar que uno sea mejor que otro.
 	\par 
-	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra), por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer la obtenida sea una mala solución.
+	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra) en ausencia(al menos aparente) de sobreajuste, por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer la obtenida como una mala solución, sobre todo teniendo en cuenta la limitada extensión del conjunto de entrenamiento.
 	
 	
 \end{document}
