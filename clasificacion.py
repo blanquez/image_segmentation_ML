@@ -115,8 +115,8 @@ for i in range(len(cat)):
 
 x_train, x_test = normalizar(x_train, x_test)
 
-x_train, y_train = tratar_outliers(x_train,y_train)
-x_test, y_test = tratar_outliers(x_test,y_test)
+#x_train, y_train = tratar_outliers(x_train,y_train)
+#x_test, y_test = tratar_outliers(x_test,y_test)
 
 #x_train, x_test = reducir(x_train, x_test)
 

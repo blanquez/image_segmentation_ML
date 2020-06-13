@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage{indentfirst}
+\usepackage{float} 
+\usepackage{graphicx}
 
 \title{AJUSTE DE PREDICTOR PARA IMAGE SEGMENTATION DATA SET}
 \author{Antonio José Blánquez Pérez, Diego Navarro Cabrera}
@@ -32,15 +34,13 @@
 	\par
 	Si que ha sido necesario codificar la variables de clase, ya que originalmente están especificadas con el nombre del elemento. Para ello hemos creado una función $encodeLabels$ la cual recibe como parámetros el conjunto y un vector con las categorías; este último, si se omite, quedará como un vector vacío. El algoritmo que se usa es simple, para cada variable de clase, si encontramos una categoría nueva la añadimos al vector y cambia su valor el índice del nuevo elemento del vector, si ya lo está, tan solo cambia el valor por el índice de la categoría correspondiente; así se usa para generar el vector de categorías en el conjunto de entrenamiento y, con esa codificación, hacer la misma transformación en el conjunto de test. Al realizarse esta tarea en tiempo de ejecución no es necesario modificar estos valores en los archivos originales. La codificación obtenida, que será útil en posteriores análisis, es la siguiente: $0:BRICKFACE,\ 1:SKY,\ 2:FOLIAGE,\ 3:CEMENT,\ 4:WINDOW,\ 5:PATH,\ 6:GRASS$.
 	\par
-	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales, ya que training consta de 210 instancias mientras que test tiene 10 veces más, 2100 instancias. 
+	Esta base de datos en concreto tiene una peculiaridad, y es que tiene una proporción entre el conjunto de entrenamiento y el de test remarcablemente anormales, ya que training consta de 210 instancias mientras que test tiene 10 veces más, 2100 instancias. Lo más probable es que esta proporción sea así porque se estima que esas 210 muestras (30 de cada clase) son suficientes para tener una imagen general de la fotografía que se quiere clasificar y por lo tanto son suficientes para ajustar el modelo. El gran número de instancias en el conjunto de prueba sirve para obtener una estimación fiable del error fuera de la muestra, ya que un 20\% o 30\% del tamaño del conjunto de entrenamiento podría ser poco incluso para un problema relativamente sencillo como este.
 	
 	\section{Valoración del interés de las variables para el problema y selección de un subconjunto (en su caso)}
 	
 	En cuanto a las variables medidas en cada instancia, todas parecen aportar información que uno podría considerar valiosa para identificar una imagen, y puesto que no es un número demasiado elevado de atributos no tenemos razones para intentar reducir la dimensionalidad del problema desechando algunas de ellas o usando una técnica de reducción como PCA.
 	\par 
 	Si que hay una variable de la que nos vamos a deshacer, pero esto es debido a que funciona como una constante que toma el mismo valor en todas las instancias, esta variable es el número de píxeles por región, que es 9 en todos los casos. Al ser una variable que no cambia de una instancia a otra no nos aporta ninguna información que pueda ser útil para nuestro modelo, por lo que eliminarla no afecta a la solución, pero si al tiempo de ejecución, que se ve reducido al tener que tratar con menos datos.
-	\par
-	También vamos a usar la función $LocalOutlierFactor$ para eliminar outliers. Hemos dejado que calcule el grado de contaminación resultante con el algoritmo que incorpora para ello y se han eliminado los valores que ha marcado como outliers, haciendo así que el ajuste posterior sea más fiable.
 	
 	\section{Normalización de las variables(en su caso)} % Diego
 	
@@ -83,7 +83,7 @@
 	\par 
 	El resto de parámetros que usa la función sirven para acelerar el proceso de aprendizaje (a veces a costa de obtener peores resultados), fijar una solución inicial o determinar las condiciones de parada. Puesto que estos factores sirven más para reducir el tiempo de ejecución que para mejorar el ajuste, y dado que el tiempo de ejecución no es excesivamente alto, no hay necesidad de cambiar los valores que vienen asignados por defecto.
 	\par 
-	Al ejecutar el programa, la mejor combinación de parámetros nos da  $E_{val} = 0.1487$ y $E_{test} = 0.1264$, valores que no distan mucho del error dentro de la muestra $E_{in} = 0.0974$. Como era de esperar, $E_{val}$ es ligeramente mayor que $E_{test}$, ya que usa menos instancias de entrenamiento, aunque también hay que tener en cuenta un ligero margen por el ruido y la aleatoriedad de la técnica usada. Al tratarse de un problema con 7 clases podemos considerar un error cercano al 12\% como un buen comienzo, ya que la relativa simpleza de los modelos lineales va limitar la calidad de los resultados que obtengamos en muchos problemas.
+	Al ejecutar el programa, la mejor combinación de parámetros nos da  $E_{val} = 0.1333$ y $E_{test} = 0.1238$, valores que no distan mucho del error dentro de la muestra $E_{in} = 0.0857$. Como era de esperar, $E_{val}$ es ligeramente mayor que $E_{test}$, ya que usa menos instancias de entrenamiento, aunque también hay que tener en cuenta un ligero margen por el ruido y la aleatoriedad de la técnica usada. Al tratarse de un problema con 7 clases podemos considerar un error cercano al 12\% como un buen comienzo, ya que la relativa simpleza de los modelos lineales va limitar la calidad de los resultados que obtengamos en muchos problemas.
 	  \par 
 	Como ya sabemos $E_{out}$ solo diferirá del valor de $E_{test}$ calculado en un infinitesimal de orden $\frac{1}{\sqrt{K}}$, siendo K el tamaño de test, que en nuestro caso es bastante grande, y que por lo tanto la diferencia entre $E_{out}$ y $E_{test}$ será muy pequeña y la podremos despreciar. Este razonamiento es valido tanto para este modelo como para los que veremos a continuación.
 	
@@ -94,7 +94,7 @@
 	\par 
 	El resto de parámetros, al igual que con $SGDClassifier$, podemos decir que modificarlos no afectaría significativamente a la calidad del resultado, por lo que podemos dejarlos con sus valores por defecto.
 	\par 
-	En cuanto a los resultados que obtenemos al ejecutar el programa, tenemos  $E_{val} = 0.0717$, $E_{test} = 0.0488$ y $E_{in} = 0$. Al tratarse de un conjunto de entrenamiento muy pequeño y no muy complejo es normal que un modelo más potente como es gradient boosting sea capaz de reducir el error dentro de la muestra a 0, sin embargo,debido a las medidas de regularización tomadas y a que el error de prueba no está muy alejado del error de entrenamiento, podemos estar tranquilos de que no estamos sobreajustando más de lo debido nuestro modelo.
+	En cuanto a los resultados que obtenemos al ejecutar el programa, tenemos  $E_{val} = 0.0571$, $E_{test} = 0.0571$ y $E_{in} = 0$. Al tratarse de un conjunto de entrenamiento muy pequeño y no muy complejo es normal que un modelo más potente como es gradient boosting sea capaz de reducir el error dentro de la muestra a 0, sin embargo,debido a las medidas de regularización tomadas y a que el error de prueba no está muy alejado del error de entrenamiento, podemos estar tranquilos de que no estamos sobreajustando más de lo debido nuestro modelo.
 	
 	\subsection{Random Forest}
 	Uno de los principales parámetros a tener en cuenta en Random Forest es el número de árboles que se usarán, que en nuestro caso hemos comprobado que el más optimo es 100 debido a que el resultado deja de mejorar a partir de ese punto, entrenando aún así en un tiempo razonable. Otro parámetro a tener en cuenta es el criterio usado al elegir los atributos, teniendo las opciones del criterio Gini y el de la entropía.
@@ -105,7 +105,7 @@
 	\par
 	Adicionalmente es posible establecer cuantos atributos participan al ramificar el árbol. Tampoco es fácil de determinar cuántos darán el mejor resultado, por lo que se han sometido a validación cruzada las posibilidades de la raíz cuadrada del total, el logaritmo en base 2 y los porcentajes de 60, 70, 80 y 90\%, que son los que hemos creído más razonables. El resultado, lejos de sorprender, es que la raíz cuadrada da el mejor resultado, por algo es el valor por defecto y el que se usa usualmente para esta técnica. El resto de parámetros que proporciona la función usada no son interesantes para este estudio, por lo que se dejan por defecto.
 	\par
-	Tras la ejecución se han obtenido los siguiente resultados: $E_{val} = 0.0615$, $E_{test} = 0.0463$ y $E_{in} = 0$. El valor de $E_{val}$ es ligeramente mayor de lo esperado pero, como ya se ha comentado, es una consecuencia del tamaño del conjunto de entrenamiento. Podemos llegar a la misma conclusión que en el caso de Boosting, el error en la muestra tan bajo podría denotar un sobreajuste, sin embargo el modelo de entrenamiento es lo suficientemente simple para ajustar el error a 0 con un modelo como Random Forest; $E_{test}$ es lo suficientemente bajo como para concluir que el resultado es satisfactorio, tan solo un error del 4.6\%.
+	Tras la ejecución se han obtenido los siguiente resultados: $E_{val} = 0.0571$, $E_{test} = 0.0528$ y $E_{in} = 0.0047$. El valor de $E_{val}$ es ligeramente mayor de lo esperado pero, como ya se ha comentado, es una consecuencia del tamaño del conjunto de entrenamiento. Podemos llegar a la misma conclusión que en el caso de Boosting, el error en la muestra tan bajo podría denotar un sobreajuste, sin embargo el modelo de entrenamiento es lo suficientemente simple para ajustar el error tan cercano a 0 con un modelo como Random Forest; $E_{test}$ es lo suficientemente bajo como para concluir que el resultado es satisfactorio, tan solo un error del 5.2\%.
 	
 	\section{Argumentar sobre la idoneidad de la función regularización usada (en su caso)}
 	
@@ -122,13 +122,28 @@
 	\par
 	En nuestro caso particular se ha decidido usar el parámetro $max_depth$ para limitar la profundidad máxima de los árboles de Random Forest por las razones ya comentadas, tras varias pruebas se ha elegido el valor 8, por lo que aunque no había demasiadas expectativas de sobreajuste lo aseguramos de esta manera.
 	
-	\section{Valoración de los resultados ( gráficas, métricas de error, análisis de residuos, etc )} % Hacer juntos al final
+	\section{Valoración de los resultados} % Hacer juntos al final
+	Los resultados finales obtenidos para cada modelo son los siguientes:
+	
+\begin{figure}[H]
+  \includegraphics[width=\linewidth]{Imagenes/CE.png}
+  %\caption{Comparativa}
+  \label{fig:boat1}
+\end{figure}
+
+	Como se puede ver, los modelos no lineales nos ofrecen un ajuste claramente mejor que el del modelo lineal, como era de esperar gracias a su mayor capacidad de separar los datos y a su propio diseño pensado para reducir la varianza y evitar el sobreajuste usando numerosos estimadores o arboles para producir una predicción fiable. 
+	\par 
+	Por otro lado, podríamos decir que el modelo que mejor resultado nos ha dado es Random Forest, sin embargo, la diferencia de este con Boosting es lo suficientemente pequeña como para que no podamos estar seguros de que esta sea una diferencia real y no solo un producto del azar inherente a estos modelos. Como se puede ver, tanto un modelo como el otro comparten el mismo $E_{val}$, a pesar de que el error de prueba de RF sea menor. Aun con todo, si tuviésemos que elegir un modelo de entre los que hemos usado, eligiríamos RF ya que aún con todo es el que mejor resultado nos ha dado.
+	
+	%Tratamiento de residuos (BLANQUEZ)
 	La misma conclusión podemos sacar de las matrices de confusión, tanto para la muestra de entrenamiento como para la de test, donde se puede apreciar que en la mayoría de casos se obtiene un resultado razonablemente bueno; no obstante creemos necesario remarcar a la vista de estos que la mayoría de errores son del mismo tipo, ya que en el resto de casos son errores poco relevantes. En concreto, este modelo tiende a clasificar erróneamente erróneamente algunas imágenes como si perteneciesen a la clase ventana (WINDOW), especialmente en el caso de la imagen del follaje (FOLIAGE) para el que clasifica mal aproximadamente la mitad de las instancias. Esto puede hacernos pensar que la imagen del follaje y la de la ventana se parezcan en los factores que más tiene en cuenta el modelo y que esto pueda estar dificultando su separación. %Como ejemplo para hacer el razonamiento conjunto más adelante.
 	\par 
 	En el proceso de selección se han sacado algunas conclusiones, como que para el número de atributos la profundidad de los árboles más grandes sigue siendo correcta, además de que aunque se regularice el resultado no mejora en gran medida, lo que quiere decir que los datos no son dados al sobreajuste % Hablar del ruido, sobreajuste y regularizacion
 	
 	\section{Justificar que se ha obtenido la mejor de las posibles soluciones con la técnica elegida y la muestra dada. Argumentar en términos de los errores de ajuste y generalización} % Hacer juntos al final
-	
+	Como ya se ha hablado antes, cada modelo se ha ajustado buscando los mejores parámetros posibles y se han tomado las medidas necesarias para asegurar que el error calculado con el conjunto de prueba es lo más fiable posible, de forma que el modelo que nos devuelva una menor tasa de error debería ser el mejor de entre las soluciones posibles. Dicho esto, la naturaleza aleatoria del proceso siempre puede afectar ligeramente a los resultados , y puesto que solo podemos estimar $E_{out}$, nunca saber su valor real, bajo condiciones ligeramente diferentes podríamos estimar como óptimos otros parámetros e incluso otros modelos, ya que como hemos dicho antes, la diferencia entre Boosting y Random Forest no es tan grande como para asegurar que uno sea mejor que otro.
+	\par 
+	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra), por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer la obtenida sea una mala solución.
 	
 	
 \end{document}
