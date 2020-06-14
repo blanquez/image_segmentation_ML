@@ -67,19 +67,6 @@ def normalizar(data_tra, data_tes):
     
     return normalized_tra, normalized_tes
 
-# Función para reducir dimensionalidad
-def reducir(data_tra,data_tes):
-    reduc = PCA(0.95)
-    reduced_tra = reduc.fit_transform(data_tra)
-    reduced_tes = reduc.transform(data_tes)
-    return reduced_tra, reduced_tes
-
-# Función para tratar outliers
-def tratar_outliers(datax,datay):
-    clf = LocalOutlierFactor(contamination='auto')
-    outliers = clf.fit_predict(datax,datay)
-    return datax[outliers==1], datay[outliers==1]
-
 # Función para aplicar transformaciones polinomiales
 def transformar_polinomial(data,exponente):
     poly = preprocessing.PolynomialFeatures(exponente)
@@ -98,33 +85,26 @@ x_test = readRawFile("datos/segmentation.test")
 x_train, y_train = extractLabels(x_train,0)
 x_test, y_test = extractLabels(x_test,0)
 
+# Pasamos los valores leidos de string a float
 dataToFloat(x_train)
 dataToFloat(x_test)
 
+# Eliminamos el atributo 2 por ser igual en todas las instancias
 removeAtribute(x_train, 2)
 removeAtribute(x_test, 2)
 
 # Preprocesado
 print("Preprocesando datos...")
 
+# Codificamos las etiquetas como números
 y_train, cat = encodeLabels(y_train)
 y_test, cat = encodeLabels(y_test, categories = cat)
+# Imprimimos por pantalla la codificación realizada
 print("Codificación de las etiquetas:")
 for i in range(len(cat)):
     print(i, ": ",cat[i])
 
 x_train, x_test = normalizar(x_train, x_test)
-
-#x_train, y_train = tratar_outliers(x_train,y_train)
-#x_test, y_test = tratar_outliers(x_test,y_test)
-
-#x_train, x_test = reducir(x_train, x_test)
-
-# Complementación clase de funciones
-#print("Calculando clase de funciones...")
-
-#x_train_sq = transformar_polinomial(x_train,2)
-#x_test_sq = transformar_polinomial(x_test,2)
 
 #----------------------------------------------------------
 #                 Modelo Lineal
@@ -134,12 +114,14 @@ x_train, x_test = normalizar(x_train, x_test)
 print("\n Modelos lineales: ")
 #print("Ejecutando validación cruzada...\n")
 
-a = (0.0001,1.0)#, 0.001, 0.01, 0.1)
+# Hiperparámetros que va a comprobar la búsqueda en grid
+a = (0.0001,0.01)
 
 parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
 linear_model = SGDClassifier()
 
+# Ajuste de parámetros
 sg = GridSearchCV(linear_model, parameters,  scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")
@@ -157,40 +139,12 @@ print("\n",confusion_matrix(y_test,model.predict(x_test)))
 
 input("\nPulse una tecla para continuar\n")
 
-#----------------------------------------------------------
-#           Perceptron Multicapa
-#----------------------------------------------------------
-# print("\n Perceptron Multicapa: ")
-
-# nd = [(i,) for i in range(50,101,10)]
-# a = (0.001, 0.01, 0.1)
-# s = ('lbfgs', 'adam')
-
-# parameters = {'hidden_layer_sizes' : nd, 'alpha' : a, 'solver' : s}
-
-# mlp = MLPClassifier(max_iter = 500, activation = 'identity')
-
-# sg = GridSearchCV(mlp, parameters,  scoring = 'accuracy', cv = 5, iid = False)
-
-# print("\nEntrenando el modelo...")
-
-# model = sg.fit(x_train,y_train)
-# Eval = 1-model.best_score_.mean()
-
-# print("\n Mejores parametros: ",model.best_params_.items())
-# print("\nEval(según CV): ",Eval)
-# print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
-# print("\n",confusion_matrix(y_train,model.predict(x_train)))
-# print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
-# print("\n",confusion_matrix(y_test,model.predict(x_test)))
-
-# input("\nPulse una tecla para continuar\n")
-
 # #----------------------------------------------------------
 # #                   Boosting
 # #----------------------------------------------------------
 print("\n Boosting: ")
 
+# Hiperparámetros 
 sub = (0.9, 0.5, 0.3)
 max_f = ('sqrt', 0.5, 1.0)
 lr = (0.1,0.5)
@@ -199,6 +153,7 @@ parameters = {'subsample' : sub, 'max_features' : max_f, 'learning_rate' : lr}
 
 gbc = GradientBoostingClassifier(n_estimators = 100)
 
+# Ajuste de Hiperparámetros
 sg = GridSearchCV(gbc, parameters, scoring = 'accuracy', cv = 5, iid = False)
 
 print("\nEntrenando el modelo...")

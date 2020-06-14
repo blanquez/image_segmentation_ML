@@ -12,6 +12,8 @@
  \setlength{\parskip}{1em} 
 
 	\maketitle
+	  \tableofcontents
+  \newpage
 	
 	% Recordar plantearse cambiar los titulos de las versiones antes de entregar
 
@@ -21,15 +23,15 @@
 	\par
 	Con esta información se pretende generar un modelo mediante técnicas de aprendizaje supervisado que prediga correctamente, dada una sección de 3x3 píxeles de una imagen, a que clase de las 7 antes mencionadas pertenece.
 	
-	\section{Argumentos a favor de la elección de los modelos}
+	\section{Elección de modelos}
 	
-	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo la primera técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además, ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables. Regresion Logística sin embargo asigna las etiquetas a cada elemento a partir de la probabilidad que tiene de pertenecer a una clase o a otra, lo cual parece ser mejor que Perceptrón probablemente porque el conjunto de entrenamiento no sea ni se acerque a ser linealmente separable.
+	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo la primera técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables. Regresion Logística sin embargo asigna las etiquetas a cada elemento a partir de la probabilidad que tiene de pertenecer a una clase o a otra, lo cual parece ser mejor que Perceptrón probablemente porque el conjunto de entrenamiento no sea ni se acerque a ser linealmente separable.
 		
 	Uno de los modelos no lineales que hemos escogido ha sido Boosting. La idea tras esta técnica es utilizar una gran cantidad de clasificadores simples, de manera que cada clasificador se centra en los errores del clasificador anterior. Uno de los atractivos de Boosting es su simpleza, tanto en dificultad como en complejidad, consiguiendo buenos resultados a pesar de ella. Inicialmente la varianza es muy baja, y con los pasos adecuados se puede conseguir bajar el sesgo en gran medida, por ello y por todas las ventajas de esta técnica esperamos conseguir buenos resultados.
 	
 	La otra elección de modelo no lineal ha sido Random Forest. Esta técnica se basa en boostrap para generar muestras y crear árboles de decision a partir de ellas. No obstante, para evitar que en todos los árboles se escojan inicialmente las mismas variables, selecciona para cada árbol un subconjunto de ellas aleatoriamente. Así, entre el bagging y esta característica conseguimos rebajar la varianza más que en el resto de técnicas basadas en árboles, que junto al bajo sesgo que consiguen los árboles de decisión, tenemos una técnica que puede proporcionar muy resultados, muy fiables, y además una gran eficiencia debido a su construcción.
 	
-	\section{Codificación de los datos de entrada para hacerlos útiles a los algoritmos}
+	\section{Codificación de los datos de entrada}
 	
 	En principio los datos no necesitan ningún tipo de codificación para ser útiles en proceso de aprendizaje, no obstante se ha planteado la conversión de los datos a combinaciones cuadráticas de estos. Sin embargo, tras pruebas usando esta técnica, se ha visto que los resultados mejoran muy poco respecto los valores originales y por lo tanto se ha decidido usar estos últimos, ya que introducir tanta complejidad en el ajuste para una mejora tan irrelevante es incluso contraproducente.
 	\par
@@ -55,15 +57,15 @@
 	\par 
 	Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
-	\section{Justificación de la función de pérdida usada}
+	\section{Métrica de error}
 	
 	Como métrica de errores vamos a usar dos:
 	\begin{enumerate}
-		\item $zero\_one\_loss$, la cual es una medida estándar de error en clasificación. Ésta proporciona una medición de los valores que pertenecen a una clase concreta y el clasificador las ha etiquetado en otra, es decir, de los elementos mal clasificados. La hemos elegido porque es una medida simple y que proporciona claramente un valor real del error.
+		\item $zero\_one\_loss$, que es una medida estándar de error en clasificación. Esta proporciona una medición de los valores que pertenecen a una clase concreta y el clasificador las ha etiquetado en otra, es decir, de los elementos mal clasificados. La hemos elegido porque es una medida simple y que proporciona claramente un valor real del error, ya que solo nos interesa reducir al mínimo el número de errores, pero no que prediga unas clases mejor que otras. Además el conjunto de entrenamiento está perfectamente balanceado por lo que no hace falta ponderar unas clases por encima de otras.
 		\item Matrices de confusión, las cuales nos proporcionan información con la que podemos estudiar qué clases son las más problemáticas para nuestros modelos y sacar información más detallada a cerca de la precisión del ajuste.
 	\end{enumerate}
 	
-	\section{Selección de técnicas y valoración de la idoneidad de cada una frente a otras alternativas}
+	\section{Selección de técnicas de ajuste}
 	
 	\subsection{Modelo Lineal}
 	Para ajustar el modelo lineal vamos a usar la función de la biblioteca sklearn del gradiente descendente estocástico $SGDClassifier$. Vamos a comparar entre 2 modelos diferentes, y decidiremos cual es mejor en tiempo de ejecución. Los modelos que vamos a comparar son regresión logística y la implementación que usa la biblioteca del Perceptrón.
@@ -74,7 +76,7 @@
 	\subsection{Random Forest}
 	En el caso de Random Forest vamos a usar la versión estándar de scikit-learn para clasificación: $RandomForestClassifier$, del módulo $ensemble$. Se plantean otras alternativas nombradas como árboles extremadamente aleatorizados, sin embargo en este caso no nos interesan ya que este conjunto de datos es lo suficientemente simple como para poder generar un número de árboles que nos garantice una buena varianza en un tiempo razonable. Es por esto por lo que no nos interesa una técnica que fuerza más la aleatoriedad en pos de bajar varianza a costa de sesgo.
 	
-	\section{Aplicación de la técnica: estimación de los parámetros, hiperparámetros y el error de generalización}
+	\section{Aplicación de la técnica}
 	
 	Para ajustar los hiperparámetros de todos los modelos usaremos la función $GridSearchCV$ de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
 	\subsection{Modelo Lineal}
@@ -136,6 +138,7 @@
 	\par
 	Estudiemos ahora las matrices de confusión(izquierda $E_{in}$, derecha ${E_{test}}$):
 	
+	\begin{figure}[H]
 	\begin{equation}
 		\begin{pmatrix}
 			29 & 0 & 0 & 0 & 1 & 0 & 0\\
@@ -156,7 +159,7 @@
 		0 & 0 & 0 & 0 & 0 & 3 & 297
 		\end{pmatrix}
 	\end{equation}
-	
+	\caption{Modelo Lineal (Regresión Logística)}
 	\begin{equation}
 	\begin{pmatrix}
 	30 & 0 & 0 & 0 & 0 & 0 & 0\\
@@ -168,15 +171,16 @@
 	0 & 0 & 0 & 0 & 0 & 0 & 30
 	\end{pmatrix}
 	\begin{pmatrix}
-	281 & 0 & 0 & 16 & 3 & 0 & 0\\
+	283 & 0 & 0 & 14 & 3 & 0 & 0\\
 	0 & 300 & 0 & 0 & 0 & 0 & 0\\
-	1 & 0 & 270 & 4 & 25 & 0 & 0\\
-	2 & 0 & 3 & 283 & 11 & 1 & 0\\
-	1 & 0 & 29 & 22 & 248 & 0 & 0\\
+	2 & 0 & 270 & 4 & 24 & 0 & 0\\
+	2 & 0 & 1 & 285 & 11 & 1 & 0\\
+	1 & 0 & 28 & 20 & 251 & 0 & 0\\
 	0 & 0 & 1 & 5 & 0 & 294 & 0\\
 	1 & 0 & 1 & 0 & 0 & 1 & 297
 	\end{pmatrix}
 	\end{equation}
+	\caption{Boosting}
 	
 	\begin{equation}
 	\begin{pmatrix}
@@ -198,6 +202,8 @@
 	0 & 0 & 0 & 0 & 0 & 3 & 297
 	\end{pmatrix}
 	\end{equation}
+	\caption{Random Forest}
+\end{figure}	
 	
 	En primer lugar analizaremos las matrices en el caso del modelo lineal $(2)$, donde podemos ver que los errores se concentran claramente, tanto en entrenamiento como en test, en las clases FOLIAGE, CEMENT y WINDOW, dando el resto muy buenos resultados aun con modelos lineales. En el caso de CEMENT hablamos incluso de un tercio de los elementos mal clasificados, por lo que será en estas tres clases donde deberá destacar el uso de modelos no lineales. El resto de elementos mal clasificados no es demasiado remarcable, son errores asumibles en un resultado satisfactorio. Es posible concluir también a partir de estos detalles que las imágenes de las clases FOLIAGE y WINDOW parecen las más difíciles de separar, la clase CEMENT sin embargo parece confundirse también con WINDOW y con PATH.
 	\par 
@@ -206,7 +212,10 @@
 	\section{Conclusiones}
 	Como ya se ha hablado antes, cada modelo se ha ajustado buscando los mejores parámetros posibles y se han tomado las medidas necesarias para asegurar que el error calculado con el conjunto de prueba es lo más fiable posible, de forma que el modelo que nos devuelva una menor tasa de error debería ser el mejor de entre las soluciones posibles. Dicho esto, la naturaleza aleatoria del proceso siempre puede afectar ligeramente a los resultados , y puesto que solo podemos estimar $E_{out}$, nunca saber su valor real, bajo condiciones ligeramente diferentes podríamos estimar como óptimos otros parámetros e incluso otros modelos, ya que como hemos dicho antes, la diferencia entre Boosting y Random Forest no es tan grande como para asegurar que uno sea mejor que otro.
 	\par 
-	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra) en ausencia(al menos aparente) de sobreajuste, por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer la obtenida como una mala solución, sobre todo teniendo en cuenta la limitada extensión del conjunto de entrenamiento.
+	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra) en ausencia (al menos aparente) de sobreajuste, por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer que la obtenida sea una mala solución, sobre todo teniendo en cuenta la limitada extensión del conjunto de entrenamiento.
+	\section{Bibliografía}
+	- https://scikit-learn.org: toda la información acerca de las funciones usadas de esta biblioteca.\par
+	- http://archive.ics.uci.edu/ml/datasets/Image+Segmentation: base de datos usada e información acerca de esta.
 	
 	
 \end{document}
