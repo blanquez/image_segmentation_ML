@@ -1,0 +1,24 @@
+\contentsline {section}{\numberline {1}Definición del problema y enfoque elegido}{3}%
+\contentsline {section}{\numberline {2}Elección de modelos}{3}%
+\contentsline {section}{\numberline {3}Codificación de los datos de entrada}{4}%
+\contentsline {section}{\numberline {4}Valoración del interés de las variables}{5}%
+\contentsline {section}{\numberline {5}Normalización de las variables}{5}%
+\contentsline {section}{\numberline {6}Métrica de error}{6}%
+\contentsline {section}{\numberline {7}Selección de técnicas de ajuste}{6}%
+\contentsline {subsection}{\numberline {7.1}Modelo Lineal}{6}%
+\contentsline {subsection}{\numberline {7.2}Boosting}{7}%
+\contentsline {subsection}{\numberline {7.3}Random Forest}{7}%
+\contentsline {subsection}{\numberline {7.4}Perceptrón Multicapa}{7}%
+\contentsline {section}{\numberline {8}Aplicación de la técnica}{7}%
+\contentsline {subsection}{\numberline {8.1}Modelo Lineal}{8}%
+\contentsline {subsection}{\numberline {8.2}Boosting}{8}%
+\contentsline {subsection}{\numberline {8.3}Random Forest}{9}%
+\contentsline {subsection}{\numberline {8.4}Perceptrón Multicapa}{10}%
+\contentsline {section}{\numberline {9}Regularización}{11}%
+\contentsline {subsection}{\numberline {9.1}Modelos Lineales}{11}%
+\contentsline {subsection}{\numberline {9.2}Boosting}{12}%
+\contentsline {subsection}{\numberline {9.3}Random Forest}{12}%
+\contentsline {subsection}{\numberline {9.4}Perceptrón Multicapa}{12}%
+\contentsline {section}{\numberline {10}Valoración de los resultados}{13}%
+\contentsline {section}{\numberline {11}Conclusiones}{16}%
+\contentsline {section}{\numberline {12}Bibliografía}{16}%
