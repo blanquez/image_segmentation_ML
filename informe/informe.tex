@@ -27,7 +27,7 @@
 	
 	Se han elegido tres modelos candidatos para el problema que nos ocupa, uno lineal y dos no lineales. El modelo lineal ha sido seleccionado mediante validación cruzada entre dos posibilidades: Regresión Logística y Perceptrón, siendo la primera técnica la que mejor resultado proporciona y por tanto la seleccionada para comparar con los dos modelos no lineales. El modelo Perceptrón es un gran clasificador, sobre todo cuando los datos son linealmente separables, ya que si esto ocurre nos asegura una clasificación perfecta de los datos de la muestra de entrenamiento; siendo además ayudado por el algoritmo Pocket, capaz de dar buenos resultados aún sin ser los datos linealmente separables. Regresion Logística sin embargo asigna las etiquetas a cada elemento a partir de la probabilidad que tiene de pertenecer a una clase o a otra, lo cual parece ser mejor que Perceptrón probablemente porque el conjunto de entrenamiento no sea ni se acerque a ser linealmente separable.
 		
-	Uno de los modelos no lineales que hemos escogido ha sido Boosting. La idea tras esta técnica es utilizar una gran cantidad de clasificadores simples, de manera que cada clasificador se centra en los errores del clasificador anterior. Uno de los atractivos de Boosting es su simpleza, tanto en dificultad como en complejidad, consiguiendo buenos resultados a pesar de ella. Inicialmente la varianza es muy baja, y con los pasos adecuados se puede conseguir bajar el sesgo en gran medida, por ello y por todas las ventajas de esta técnica esperamos conseguir buenos resultados.
+	Uno de los modelos no lineales que hemos escogido ha sido Boosting. La idea tras esta técnica es utilizar una gran cantidad de clasificadores simples, de manera que cada clasificador se centra en los errores del clasificador anterior. Uno de los atractivos de Boosting es su simpleza, tanto en dificultad como en complejidad, consiguiendo buenos resultados manteniendo la complejidad al mínimo. Inicialmente la varianza es muy baja, y con los pasos adecuados se puede conseguir bajar el sesgo en gran medida, por ello y por todas las ventajas de esta técnica esperamos conseguir buenos resultados.
 	
 	La otra elección de modelo no lineal ha sido Random Forest. Esta técnica se basa en boostrap para generar muestras y crear árboles de decision a partir de ellas. No obstante, para evitar que en todos los árboles se escojan inicialmente las mismas variables, selecciona para cada árbol un subconjunto de ellas aleatoriamente. Así, entre el bagging y esta característica conseguimos rebajar la varianza más que en el resto de técnicas basadas en árboles, que junto al bajo sesgo que consiguen los árboles de decisión, tenemos una técnica que puede proporcionar muy resultados, muy fiables, y además una gran eficiencia debido a su construcción.
 	
@@ -115,17 +115,19 @@
 	Tras la ejecución se han obtenido los siguiente resultados: $E_{val} = 0.0571$, $E_{test} = 0.0528$ y $E_{in} = 0.0047$. Podemos llegar a la misma conclusión que en el caso de Boosting, el error en la muestra tan bajo podría denotar un sobreajuste, sin embargo el modelo de entrenamiento es lo suficientemente simple para ajustar el error tan cercano a 0 con un modelo como Random Forest; $E_{test}$ es lo suficientemente bajo como para concluir que el resultado es satisfactorio, tan solo un error del 5.2\%.
 	
 	\subsection{Perceptrón Multicapa}
-	Es necesario comentar que en este caso no se ha utilizado $GridSearchCV$ debido a que conseguimos que funcionara correctamente, además de que conlleva un tiempo de ejecución bastante largo, por tanto los parámetros usados han sido seleccionados haciendo pruebas y razonamientos que se comentan a continuación. A tener en cuenta que los parámetros de $MPLClassifier$ no mencionados en este análisis, o no son usados por ser dependientes de otros parámetros, o no son interesantes para el problema que nos ocupa.
+	Es necesario comentar que en este caso la búsqueda con $GridSearchCV$ se ha hecho durante la implementación y se han fijado los valores óptimos en la versión final del código, ya que de otra forma conllevaría un tiempo de ejecución bastante largo. A tener en cuenta que los parámetros de $MPLClassifier$ no mencionados en este análisis, o no son usados por ser dependientes de otros parámetros, o no son interesantes para el problema que nos ocupa.
 	\par
 	Un parámetro especificado ha sido el valor $\alpha$ para regularización, la cual se detallará en el apartado correspondiente. El valor ha sido escogido como el que mejor resultado ha sido capaz de devolver.
 	\par
 	Otro parámetro necesario es el de máximo de iteraciones, que se ha establecido lo suficientemente alto como para que en ningún caso se llegue a ellas, en este caso 100000. Esto es posible debido a que los tiempos de ejecución no han llegado a ser tan pronunciados como para plantearse establecer un máximo de ejecuciones.
 	\par
-	De los tres parámetros utilizados más importantes, primero hablaremos de la técnica usada en la resolución de los pesos. Curiosamente no ha sido SGD el que ha dado mejor resultado, si no que el que lo ha hecho y con mucha diferencia ha sido $lbfgs$. Este optimizador proviene de métodos Quasi-Newton, que son alternativas al método de Newton estándar. Este comportamiento tiene una razón, y es debido a que esta opción es, de la presentes, la mejor para conjuntos de datos pequeños, y si por algo destaca el nuestro es por ello.
+	De los tres parámetros utilizados más importantes, primero hablaremos de la técnica usada en la resolución de los pesos. Curiosamente no ha sido SGD el que ha dado mejor resultado, si no que el que lo ha hecho y con mucha diferencia ha sido $lbfgs$. Este optimizador proviene de métodos Quasi-Newton, que son alternativas al método de Newton estándar. Este comportamiento tiene una razón, y es debido a que esta opción es, de la presentes, la mejor para conjuntos de datos pequeños, y si por algo destaca el nuestro es por su reducido tamaño.
 	\par
 	Otro parámetro importante es la función de activación en las capas ocultas, para la que ha sido establecida $tanh$. No hay mucho que decir, puesto que es una función estándar para estos usos, dado que es un punto medio entre una función binaria y una lineal.
 	\par
-	Para el final queda el que probablemente sea el parámetro más importante: el número de neuronas y capas ocultas. Hemos de tener en cuenta que la carga computacional y el aprendizaje crecen directamente proporcional por el número de capas, que normalmente no suelen ser demasiadas. En nuestro caso, al no ser demasiado complejo el conjunto de datos, no son necesarias más de 1. Por tanto establecidas el número de capas ocultas como 1 falta confirmar el número de neuronas, dicho número se ha buscado entre 19 y 7, que es el número de neuronas en el resto de capas, quedando como elegido el número 8. Que este sea el mejor valor nos dice que la complejidad de nuestra base de datos no es demasiado alta, lo cual cuadra con el resto de deducciones hechas previamente.
+	Para el final queda el que probablemente sea el parámetro más importante: el número de neuronas y capas ocultas. Hemos de tener en cuenta que la carga computacional y el aprendizaje crecen de forma directamente proporcional al el número de capas, que normalmente no suelen ser demasiadas. En nuestro caso, al no ser demasiado complejo el conjunto de datos, no es necesaria más de 1 capa oculta. Por tanto establecidas el número de capas ocultas, falta confirmar el número de neuronas, dicho número se ha buscado entre 19 y 7, que es el número de neuronas en las capas de entrada y salida respectivamente, quedando como elegido el número 8. Que este sea el mejor valor nos dice que la complejidad de nuestra base de datos no es demasiado alta, algo que cuadra con el resto de deducciones hechas previamente, y que un número de neuronas entre 50 y 100, tal y como se recomienda en el guión, sería demasiado alto para un modelo tan sencillo.
+	\par 
+	Los resultados obtenidos con este modelo son los siguientes: $E_{val} = 0.0809$, $E_{test} = 0.0785$ y $E_{in} = 0.0047$. Al igual que los otros modelos podemos ver que el ajuste dentro de la muestra es muy bueno, con solo 1 instancia mal clasificada, sin embargo, fuera de la muestra el error el mayor que en los otros dos modelos no lineales, posiblemente debido a que estos son mejores a la hora de reducir la distancia entre $E_{in}$ y $E_{out}$ al estar diseñados para reducir la variabilidad del error usando varios estimadores distintos para los distintos sesgos que estos puedan tener.
 	
 	\section{Regularización}
 	
@@ -152,7 +154,9 @@
 	  \label{fig:boat1}
 	\end{figure}
 	Como se puede ver, los modelos no lineales nos ofrecen un ajuste claramente mejor que el del modelo lineal, como era de esperar gracias a su mayor capacidad de separar los datos y a su propio diseño pensado para reducir la varianza y evitar el sobreajuste usando numerosos estimadores o arboles para producir una predicción fiable. 
-	\par 
+	\par
+	Tal y como hemos mencionado antes, el modelo de perceptron multicapa nos ofrece un mejor resultado que el modelo lineal, pero peor que los otros dos modelos no lineales, y puesto que su error dentro de la muestra es prácticamente 0 podemos pensar que esta diferencia entre modelos se debe a una peor capacidad de reducir la diferencia entre $E_{in}$ y $E_{out}$. Además podríamos decir que el gran punto a favor de este tipo de modelo es que funciona muy bien en una alta dimensionalidad y con conjuntos de datos grandes que presenten patrones no lineales, pero la estamos usando para predecir un modelo no lineal no demasiado complejo a través de un conjunto de entrenamiento anormalmente pequeño y con una dimensionalidad muy baja, por lo que no se le puede sacar todo el provecho que cabría esperar en otras circunstancias.
+	\par
 	Por otro lado, podríamos decir que el modelo que mejor resultado nos ha dado es Random Forest, sin embargo, la diferencia de este con Boosting es lo suficientemente pequeña como para que no podamos estar seguros de que esta sea una diferencia real y no solo un producto del azar inherente a estos modelos. Como se puede ver, tanto un modelo como el otro comparten el mismo $E_{val}$, a pesar de que el error de prueba de RF sea menor. Aun con todo, si tuviésemos que elegir un modelo de entre los que hemos usado, eligiríamos RF ya que aún con todo es el que mejor resultado nos ha dado.
 	\par
 	Estudiemos ahora las matrices de confusión(izquierda $E_{in}$, derecha ${E_{test}}$):
@@ -179,6 +183,9 @@
 		\end{pmatrix}
 	\end{equation}
 	\caption{Modelo Lineal (Regresión Logística)}
+	\end{figure}
+		En primer lugar analizaremos las matrices en el caso del modelo lineal $(2)$, donde podemos ver que los errores se concentran claramente, tanto en entrenamiento como en test, en las clases FOLIAGE, CEMENT y WINDOW, dando el resto muy buenos resultados aun con modelos lineales. En el caso de CEMENT hablamos incluso de un tercio de los elementos mal clasificados, por lo que será en estas tres clases donde deberá destacar el uso de modelos no lineales. El resto de elementos mal clasificados no es demasiado remarcable, son errores asumibles en un resultado satisfactorio. Es posible concluir también a partir de estos detalles que las imágenes de las clases FOLIAGE y WINDOW parecen las más difíciles de separar, la clase CEMENT sin embargo parece confundirse también con WINDOW y con PATH.
+	\begin{figure}[H]
 	\begin{equation}
 	\begin{pmatrix}
 	30 & 0 & 0 & 0 & 0 & 0 & 0\\
@@ -200,7 +207,8 @@
 	\end{pmatrix}
 	\end{equation}
 	\caption{Boosting}
-	
+	\end{figure}
+	\begin{figure}[H]
 	\begin{equation}
 	\begin{pmatrix}
 	29 & 0 & 0 & 0 & 1 & 0 & 0\\
@@ -222,20 +230,37 @@
 	\end{pmatrix}
 	\end{equation}
 	\caption{Random Forest}
+	\begin{equation}
+	\begin{pmatrix}
+	30 & 0 & 0 & 0 & 0 & 0 & 0\\
+	0 & 30 & 0 & 0 & 0 & 0 & 0\\
+	0 & 0 & 30 & 0 & 0 & 0 & 0\\
+	0 & 0 & 0 & 29 & 1 & 0 & 0\\
+	0 & 0 & 0 & 0 & 30 & 0 & 0\\
+	0 & 0 & 0 & 0 & 0 & 30 & 0\\
+	0 & 0 & 0 & 0 & 0 & 0 & 30
+	\end{pmatrix}
+	\begin{pmatrix}
+	275 &  0 &  0 & 23  & 2  & 0 &  0\\
+   0 & 300  & 0 &  0 &   0 &  0  & 0\\
+   1 &  0 & 268  & 7 & 24 &  0 &  0\\
+   1 &  0  & 1 & 263 & 22 & 13 &  0\\
+   1 &  0 & 43 & 24 & 232  & 0 &   0\\
+   0 &  0 &  0 &  0 &  0 &300 &  0\\
+   0 &  0  & 1 &  0  & 0  & 2 & 297\\
+	\end{pmatrix}
+	\end{equation}
+	\caption{Multi-Layer Perceptron}
 \end{figure}	
-	
-	En primer lugar analizaremos las matrices en el caso del modelo lineal $(2)$, donde podemos ver que los errores se concentran claramente, tanto en entrenamiento como en test, en las clases FOLIAGE, CEMENT y WINDOW, dando el resto muy buenos resultados aun con modelos lineales. En el caso de CEMENT hablamos incluso de un tercio de los elementos mal clasificados, por lo que será en estas tres clases donde deberá destacar el uso de modelos no lineales. El resto de elementos mal clasificados no es demasiado remarcable, son errores asumibles en un resultado satisfactorio. Es posible concluir también a partir de estos detalles que las imágenes de las clases FOLIAGE y WINDOW parecen las más difíciles de separar, la clase CEMENT sin embargo parece confundirse también con WINDOW y con PATH.
-	\par 
-	Si comparamos el comportamiento anterior con el presente en Boosting y RF $(3)(4)$ se pueden ver distintas mejoras. La más evidente es que el problema con la clase CEMENT, aunque sigue quedando algo presente, ha mejorado en gran medida; si antes no era para nada un buen resultado ahora podemos afirmar que es etiquetado de manera satisfactoria dentro de un margen de error asumible. De la misma manera se puede observar y confirmar que la dificultad de separar las clases FOLIAGE y WINDOW queda presente, añadiendo el aliciente de que con estos dos modelos la clasificación en la muestra de entrenamiento es prácticamente perfecta. Esto deja patente que es difícil separar ambas clases bajo los atributos manejados en este estudio y que por tanto, junto a la clase CEMENT y en algún caso BRICKFACE, son las que afectan principalmente al error ya estudiado. No obtstante los resultados, tanto de Boosting como de RF, mejoran en gran medida al modelo lineal y proporcionan un ajuste, al menos en nuestra opinión, de calidad.
-	\par
-	Como podemos observar el perceptrón multicapa no obtiene resultados demasiado destacables, de hecho inferiores al de los otros modelos no lineales siendo esta una técnica mucho mas refinada. Es en gran parte lógico que esto ocurra ya que el gran punto a favor de este tipo de técnicas es que funcionan muy bien en una alta dimensionalidad y con conjuntos de datos grandes que presenten patrones no lineales, y la estamos usando para predecir un modelo no lineal pero no demasiado complejo a través de un conjunto de entrenamiento anormalmente pequeño y con una dimensionalidad muy baja.
+
+	Si comparamos el comportamiento anterior con el presente en los modelos no lineales $(3)(4)$ se pueden ver distintas mejoras. La más evidente es que el problema con la clase CEMENT, aunque sigue quedando algo presente, ha mejorado en gran medida; si antes no era para nada un buen resultado ahora podemos afirmar que es etiquetado de manera satisfactoria dentro de un margen de error asumible. De la misma manera se puede observar y confirmar que la dificultad de separar las clases FOLIAGE y WINDOW queda presente, añadiendo el aliciente de que con estos dos modelos la clasificación en la muestra de entrenamiento es prácticamente perfecta. Esto deja patente que es difícil separar ambas clases bajo los atributos manejados en este estudio y que por tanto, junto a la clase CEMENT y en algún caso BRICKFACE, son las que afectan principalmente al error ya estudiado. No obtstante los resultados, tanto de estos modelos, mejoran en gran medida al modelo lineal y proporcionan un ajuste, al menos en nuestra opinión, de calidad, especialmente en el caso de RF y Boosting.
 	
 	\section{Conclusiones}
 	Como ya se ha hablado antes, cada modelo se ha ajustado buscando los mejores parámetros posibles y se han tomado las medidas necesarias para asegurar que el error calculado con el conjunto de prueba es lo más fiable posible, de forma que el modelo que nos devuelva una menor tasa de error debería ser el mejor de entre las soluciones posibles. Dicho esto, la naturaleza aleatoria del proceso siempre puede afectar ligeramente a los resultados , y puesto que solo podemos estimar $E_{out}$, nunca saber su valor real, bajo condiciones ligeramente diferentes podríamos estimar como óptimos otros parámetros e incluso otros modelos, ya que como hemos dicho antes, la diferencia entre Boosting y Random Forest no es tan grande como para asegurar que uno sea mejor que otro.
 	\par 
 	Otra razón para creer que la solución obtenida es lo mejor posible es que tanto Boosting como RF tienen un error dentro de la muestra prácticamente igual a 0 (RF solo clasifica mal 1 muestra) en ausencia (al menos aparente) de sobreajuste, por lo que la única forma de ajustar mejor el error fuera de esta sería reducir aún más la diferencia entre $E_{in}$ y $E_{out}$, algo en lo que estos modelos ya son especialmente buenos, por lo que cuesta creer que la obtenida sea una mala solución, sobre todo teniendo en cuenta la limitada extensión del conjunto de entrenamiento.
 	\par
-	 El perceptrón multicapa se seleccionó para comprobar su rendimiento en este tipo de conjuntos, y como hemos visto modelos más simples y más rápidos obtienen mejores resultados. A la vista de todo esto podemos concluir que no es un modelo apropiado para bases de datos con estas características, si no que su verdadera capacidad se denota en conjuntos más grandes y complejos.
+	 El perceptrón multicapa se seleccionó para comprobar su rendimiento en este tipo de conjuntos, y como hemos visto modelos mejor preparados para reducir la variabilidad del error obtienen mejores resultados. A la vista de todo esto podemos concluir que no es un modelo apropiado para bases de datos con estas características, si no que su verdadera capacidad se denota en conjuntos más grandes y complejos.
 	\section{Bibliografía}
 	- https://scikit-learn.org: toda la información acerca de las funciones usadas de esta biblioteca.\par
 	- http://archive.ics.uci.edu/ml/datasets/Image+Segmentation: base de datos usada e información acerca de esta.

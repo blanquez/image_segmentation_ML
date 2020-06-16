@@ -203,6 +203,9 @@ input("\nPulse una tecla para continuar\n")
 # #----------------------------------------------------------
 print("\n Multi-layer Perceptron: ")
 
+# Para mantener la homogeneidad dentro del código usaremos la función
+# GridSearchCV con una única combinación de parámetros para ajustar el modelo
+
 hidden = [(8,)]
 mi = [100000]
 a = [0.1]
