@@ -5,8 +5,6 @@
 import numpy as np
 
 from sklearn import preprocessing
-from sklearn.decomposition import PCA
-from sklearn.neighbors import LocalOutlierFactor
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import zero_one_loss, confusion_matrix
@@ -198,5 +196,35 @@ print("\n",confusion_matrix(y_train,model.predict(x_train)))
 print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
 print("\n",confusion_matrix(y_test,model.predict(x_test)))
 
-input("\nPulse una tecla para terminar\n")
+input("\nPulse una tecla para continuar\n")
 
+# #----------------------------------------------------------
+# #               Multi-layer Perceptron
+# #----------------------------------------------------------
+print("\n Multi-layer Perceptron: ")
+
+hidden = [(8,)]
+mi = [100000]
+a = [0.1]
+act = ['tanh']
+s = ['lbfgs']
+
+parameters = {'hidden_layer_sizes' : hidden, 'alpha' : a,'max_iter' : mi, 'activation' : act, 'solver' : s}
+
+mlp = MLPClassifier()
+
+sg = GridSearchCV(mlp, parameters, scoring = 'accuracy', cv = 5, iid = False)
+
+print("\nEntrenando el modelo...")
+
+model = sg.fit(x_train,y_train)
+Eval = 1-model.best_score_.mean()
+
+print("\n Mejores parametros: ",model.best_params_.items())
+print("\nEval(según CV): ",Eval)
+print("\nEin: ",zero_one_loss(y_train,model.predict(x_train)))
+print("\n",confusion_matrix(y_train,model.predict(x_train)))
+print("\nEtest: ",zero_one_loss(y_test,model.predict(x_test)))
+print("\n",confusion_matrix(y_test,model.predict(x_test)))
+
+input("\nPulse una tecla para terminar\n")
