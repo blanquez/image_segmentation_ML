@@ -58,15 +58,7 @@
 	\par 
 	Este tipo de escala mantiene la distribución de los valores, pero los ajusta a un rango entre 0 y 1.  Si supiéramos que los datos se siguen un tipo de distribución como la distribución normal podríamos usar otras formas de normalización, pero este no parece ser el caso, por lo que usar estas otras técnicas modificaría la distribución de la muestra y provocaría un peor ajuste.
 	\par 
-	Para evitar mezclar la información del conjunto de entrenamiento con la del de prueba aplicaremos este ajuste en cada conjunto de forma independiente, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
-	
-	\section{Métrica de error}
-	
-	Como métrica de errores vamos a usar dos:
-	\begin{enumerate}
-		\item $zero\_one\_loss$, que es una medida estándar de error en clasificación. Esta proporciona una medición de los valores que pertenecen a una clase concreta y el clasificador las ha etiquetado en otra, es decir, de los elementos mal clasificados. La hemos elegido porque es una medida simple y que proporciona claramente un valor real del error, ya que solo nos interesa reducir al mínimo el número de errores, pero no que prediga unas clases mejor que otras. Además el conjunto de entrenamiento está perfectamente balanceado por lo que no hace falta ponderar unas clases por encima de otras.
-		\item Matrices de confusión, las cuales nos proporcionan información con la que podemos estudiar qué clases son las más problemáticas para nuestros modelos y sacar información más detallada a cerca de la precisión del ajuste.
-	\end{enumerate}
+	Para evitar mezclar la información del conjunto de prueba con la del de entrenamiento aplicaremos ajustaremos esta transformación primero en el conjunto de entrenamiento y utilizaremos los rangos obtenidos en este para transformar el conjunto de prueba, ya que si no no podríamos confiar en el valor de $E_{test}$ para estimar $E_{out}$.
 	
 	\section{Selección de técnicas de ajuste}
 	
@@ -84,6 +76,8 @@
 	\section{Aplicación de la técnica}
 	
 	Para ajustar los hiperparámetros de todos los modelos usaremos la función $GridSearchCV$(con una excepción que luego comentaremos) de la biblioteca scikit-learn, que recibe un conjunto de valores posibles para los distintos parámetros que se quieren ajustar y usa validación cruzada para determinar cual es la mejor combinación de dichos valores.
+	\par 
+	Para calcular el error vamos a usar la función $zero\_one\_loss$, que es una medida estándar de error en clasificación. Esta proporciona una medición de los valores que pertenecen a una clase concreta y el clasificador las ha etiquetado en otra, es decir, de los elementos mal clasificados. La hemos elegido porque es una medida simple y que proporciona claramente un valor real del error, ya que solo nos interesa reducir al mínimo el número de errores, pero no que prediga unas clases mejor que otras. Además el conjunto de entrenamiento está perfectamente balanceado por lo que no hace falta ponderar unas clases por encima de otras.
 	\subsection{Modelo Lineal}
 	Para el ajuste de los modelos lineales nos centraremos en 2 parámetros que ajustaremos con $GridSearchCV$: loss, que indicará el modelo ajustado, que podrá ser log (regresión logística) o perceptron, como ya se ha comentado antes; y el factor de regularización, que provocará una regularización más o menos agresiva en función de lo alto que sea.
 	\par 
@@ -162,7 +156,7 @@
 	\par
 	Por otro lado, podríamos decir que el modelo que mejor resultado nos ha dado es Random Forest, sin embargo, la diferencia de este con Boosting es lo suficientemente pequeña como para que no podamos estar seguros de que esta sea una diferencia real y no solo un producto del azar inherente a estos modelos. Como se puede ver, tanto un modelo como el otro comparten el mismo $E_{val}$, a pesar de que el error de prueba de RF sea menor. Aun con todo, si tuviésemos que elegir un modelo de entre los que hemos usado, eligiríamos RF ya que aún con todo es el que mejor resultado nos ha dado.
 	\par
-	Estudiemos ahora las matrices de confusión(izquierda $E_{in}$, derecha ${E_{test}}$):
+	Además de los valores numéricos de error, vamos a estudiar ahora las matrices de confusión (izquierda $E_{in}$, derecha ${E_{test}}$) que nos permitirán saber cuales son las clases más problemáticas para nuestros modelos y sacar información más detallada acerca de la precisión del ajuste:
 	
 	\begin{figure}[H]
 	\begin{equation}

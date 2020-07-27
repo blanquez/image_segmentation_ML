@@ -117,7 +117,7 @@ a = (0.0001,0.01)
 
 parameters = {'loss' : ('log', 'perceptron'), 'alpha' : a}
 
-linear_model = SGDClassifier()
+linear_model = SGDClassifier(penalty = 'l1')
 
 # Ajuste de parámetros
 sg = GridSearchCV(linear_model, parameters,  scoring = 'accuracy', cv = 5, iid = False)
